@@ -1,3 +1,9 @@
+# =========================
+# Project Files
+# =========================
+*.csv
+www/
+
 # History files
 .Rhistory
 .Rapp.history
