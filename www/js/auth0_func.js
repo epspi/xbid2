@@ -39,12 +39,17 @@ window.addEventListener('load', function() {
     localStorage.setItem('id_token', authResult.idToken);
 
     // Retrigger profile retrieval
-    RetrieveProfile();
+    // RetrieveProfile();
+    location.reload();
   });
 
   //retrieve the profile upon load
   var RetrieveProfile = function() {
     var id_token = localStorage.getItem('id_token');
+
+    if (id_token == null) {
+      lock.show();
+    }
 
     // Tell shiny to fetch the user profile using token, or pass null
     setTimeout(function () { Shiny.onInputChange('token', id_token); }, 0);
