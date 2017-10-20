@@ -23,35 +23,8 @@
     <link id="mainStyles" rel="stylesheet" media="screen" href="css/styles.min.css">
     <!-- Modernizr-->
     <script src="js/modernizr.min.js"></script>
-
     <!-- Shiny-->
-    <script type="application/shiny-singletons">12b282b6c4e1ec3cee386f4ca6165aafc4731a84,ca738290fc94c6029d52a1051eb4f78e5cc8d345</script>
-    <script type="application/html-dependencies">json2[2014.02.04];jquery[1.12.4];shiny[1.0.5]</script>
-    <script src="shared/json2-min.js"></script>
-    <script src="shared/jquery.min.js"></script>
-    <link href="shared/shiny.css" rel="stylesheet">
-    <script src="shared/shiny.min.js"></script>  <style>.shinyjs-hide { display: none !important; }</style>
-    <script>Shiny.addCustomMessageHandler('shinyjs-show', function(params) { shinyjs.debugMessage('shinyjs: calling function "show" with parameters:'); shinyjs.debugMessage(params); shinyjs.show(params);});
-    Shiny.addCustomMessageHandler('shinyjs-hide', function(params) { shinyjs.debugMessage('shinyjs: calling function "hide" with parameters:'); shinyjs.debugMessage(params); shinyjs.hide(params);});
-    Shiny.addCustomMessageHandler('shinyjs-toggle', function(params) { shinyjs.debugMessage('shinyjs: calling function "toggle" with parameters:'); shinyjs.debugMessage(params); shinyjs.toggle(params);});
-    Shiny.addCustomMessageHandler('shinyjs-enable', function(params) { shinyjs.debugMessage('shinyjs: calling function "enable" with parameters:'); shinyjs.debugMessage(params); shinyjs.enable(params);});
-    Shiny.addCustomMessageHandler('shinyjs-disable', function(params) { shinyjs.debugMessage('shinyjs: calling function "disable" with parameters:'); shinyjs.debugMessage(params); shinyjs.disable(params);});
-    Shiny.addCustomMessageHandler('shinyjs-toggleState', function(params) { shinyjs.debugMessage('shinyjs: calling function "toggleState" with parameters:'); shinyjs.debugMessage(params); shinyjs.toggleState(params);});
-    Shiny.addCustomMessageHandler('shinyjs-addClass', function(params) { shinyjs.debugMessage('shinyjs: calling function "addClass" with parameters:'); shinyjs.debugMessage(params); shinyjs.addClass(params);});
-    Shiny.addCustomMessageHandler('shinyjs-removeClass', function(params) { shinyjs.debugMessage('shinyjs: calling function "removeClass" with parameters:'); shinyjs.debugMessage(params); shinyjs.removeClass(params);});
-    Shiny.addCustomMessageHandler('shinyjs-toggleClass', function(params) { shinyjs.debugMessage('shinyjs: calling function "toggleClass" with parameters:'); shinyjs.debugMessage(params); shinyjs.toggleClass(params);});
-    Shiny.addCustomMessageHandler('shinyjs-html', function(params) { shinyjs.debugMessage('shinyjs: calling function "html" with parameters:'); shinyjs.debugMessage(params); shinyjs.html(params);});
-    Shiny.addCustomMessageHandler('shinyjs-onevent', function(params) { shinyjs.debugMessage('shinyjs: calling function "onevent" with parameters:'); shinyjs.debugMessage(params); shinyjs.onevent(params);});
-    Shiny.addCustomMessageHandler('shinyjs-alert', function(params) { shinyjs.debugMessage('shinyjs: calling function "alert" with parameters:'); shinyjs.debugMessage(params); shinyjs.alert(params);});
-    Shiny.addCustomMessageHandler('shinyjs-logjs', function(params) { shinyjs.debugMessage('shinyjs: calling function "logjs" with parameters:'); shinyjs.debugMessage(params); shinyjs.logjs(params);});
-    Shiny.addCustomMessageHandler('shinyjs-runjs', function(params) { shinyjs.debugMessage('shinyjs: calling function "runjs" with parameters:'); shinyjs.debugMessage(params); shinyjs.runjs(params);});
-    Shiny.addCustomMessageHandler('shinyjs-reset', function(params) { shinyjs.debugMessage('shinyjs: calling function "reset" with parameters:'); shinyjs.debugMessage(params); shinyjs.reset(params);});
-    Shiny.addCustomMessageHandler('shinyjs-delay', function(params) { shinyjs.debugMessage('shinyjs: calling function "delay" with parameters:'); shinyjs.debugMessage(params); shinyjs.delay(params);});</script>
-    <script src="shinyjs/shinyjs-default-funcs.js"></script>
-    <script>shinyjs.debug = false;</script>
-    <script src="shiny.router/page.js"></script>
-
-
+    {{ headContent() }}
   </head>
   <!-- Body-->
   <body>
@@ -541,89 +514,9 @@
       </div>
     </header>
     <!-- Off-Canvas Wrapper-->
-    <div class="offcanvas-wrapper">
-      <!-- Page Content-->
-      {{ content }}
-
-      <!-- Site Footer-->
-      <footer class="site-footer">
-        <div class="container">
-          <div class="row">
-            <div class="col-lg-3 col-md-6">
-              <!-- Contact Info-->
-              <section class="widget widget-light-skin">
-                <h3 class="widget-title">Get In Touch With Us</h3>
-                <p class="text-white">Phone: 00 33 169 7720</p>
-                <ul class="list-unstyled text-sm text-white">
-                  <li><span class="opacity-50">Monday-Friday:</span>9.00 am - 8.00 pm</li>
-                  <li><span class="opacity-50">Saturday:</span>10.00 am - 6.00 pm</li>
-                </ul>
-                <p><a class="navi-link-light" href="#">support@unishop.com</a></p><a class="social-button shape-circle sb-facebook sb-light-skin" href="#"><i class="socicon-facebook"></i></a><a class="social-button shape-circle sb-twitter sb-light-skin" href="#"><i class="socicon-twitter"></i></a><a class="social-button shape-circle sb-instagram sb-light-skin" href="#"><i class="socicon-instagram"></i></a><a class="social-button shape-circle sb-google-plus sb-light-skin" href="#"><i class="socicon-googleplus"></i></a>
-              </section>
-            </div>
-            <div class="col-lg-3 col-md-6">
-              <!-- Mobile App Buttons-->
-              <section class="widget widget-light-skin">
-                <h3 class="widget-title">Our Mobile App</h3><a class="market-button apple-button mb-light-skin" href="#"><span class="mb-subtitle">Download on the</span><span class="mb-title">App Store</span></a><a class="market-button google-button mb-light-skin" href="#"><span class="mb-subtitle">Download on the</span><span class="mb-title">Google Play</span></a><a class="market-button windows-button mb-light-skin" href="#"><span class="mb-subtitle">Download on the</span><span class="mb-title">Windows Store</span></a>
-              </section>
-            </div>
-            <div class="col-lg-3 col-md-6">
-              <!-- About Us-->
-              <section class="widget widget-links widget-light-skin">
-                <h3 class="widget-title">About Us</h3>
-                <ul>
-                  <li><a href="#">Careers</a></li>
-                  <li><a href="#">About Unishop</a></li>
-                  <li><a href="#">Our Story</a></li>
-                  <li><a href="#">Services</a></li>
-                  <li><a href="#">Our Blog</a></li>
-                </ul>
-              </section>
-            </div>
-            <div class="col-lg-3 col-md-6">
-              <!-- Account / Shipping Info-->
-              <section class="widget widget-links widget-light-skin">
-                <h3 class="widget-title">Account &amp; Shipping Info</h3>
-                <ul>
-                  <li><a href="#">Your Account</a></li>
-                  <li><a href="#">Shipping Rates & Policies</a></li>
-                  <li><a href="#">Refunds & Replacements</a></li>
-                  <li><a href="#">Taxes</a></li>
-                  <li><a href="#">Delivery Info</a></li>
-                  <li><a href="#">Affiliate Program</a></li>
-                </ul>
-              </section>
-            </div>
-          </div>
-          <hr class="hr-light mt-2 margin-bottom-2x">
-          <div class="row">
-            <div class="col-md-7 padding-bottom-1x">
-              <!-- Payment Methods-->
-              <div class="margin-bottom-1x" style="max-width: 615px;"><img src="img/payment_methods.png" alt="Payment Methods">
-              </div>
-            </div>
-            <div class="col-md-5 padding-bottom-1x">
-              <div class="margin-top-1x hidden-md-up"></div>
-              <!--Subscription-->
-              <form class="subscribe-form" action="//rokaux.us12.list-manage.com/subscribe/post?u=c7103e2c981361a6639545bd5&amp;amp;id=1194bb7544" method="post" target="_blank" novalidate>
-                <div class="clearfix">
-                  <div class="input-group input-light">
-                    <input class="form-control" type="email" name="EMAIL" placeholder="Your e-mail"><span class="input-group-addon"><i class="icon-mail"></i></span>
-                  </div>
-                  <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
-                  <div style="position: absolute; left: -5000px;" aria-hidden="true">
-                    <input type="text" name="b_c7103e2c981361a6639545bd5_1194bb7544" tabindex="-1">
-                  </div>
-                  <!-- <button class="btn btn-primary" type="submit"><i class="icon-check"></i></button> -->
-                </div><span class="form-text text-sm text-white opacity-50">Subscribe to our Newsletter to receive early discount offers, latest news, sales and promo information.</span>
-              </form>
-            </div>
-          </div>
-          <!-- Copyright-->
-          <p class="footer-copyright">© All rights reserved. Made with &nbsp;<i class="icon-heart text-danger"></i><a href="http://rokaux.com/" target="_blank"> &nbsp;by rokaux</a></p>
-        </div>
-      </footer>
-    </div>
+    {{ content }}
+    <!-- <div class="offcanvas-wrapper">
+    </div> -->
     <!-- Back To Top Button--><a class="scroll-to-top-btn" href="#"><i class="icon-arrow-up"></i></a>
     <!-- Backdrop-->
     <div class="site-backdrop"></div>
