@@ -42,13 +42,17 @@ server <- function(input, output, session) {
     }
   })
   
-    route_script <- MakeRouter(routes)
-    cat(route_script)
-    runjs(route_script)
+  route_script <- MakeRouter(routes)
+  cat(route_script)
+  runjs(route_script)
   
   #  ------->> Content ---------
   
   # --Body--
+  output$body <- renderUI({
+    routes[[path()]]
+  })
+  
   output$body <- renderUI({
     routes[[path()]]
   })

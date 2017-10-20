@@ -26,8 +26,13 @@
     <!-- Shiny-->
     {{ headContent() }}
     {{ useShinyjs() }}
+    <!-- Auth0 lock script -->
+    <script src="http://cdn.auth0.com/js/lock/10.4.0/lock.min.js"></script>
+    <script src="js/auth0-variables.js"></script>
+    <!-- Auth0 supporting functions -->
+    <script src="js/auth0_func.js"></script>
+    <!-- Director router -->
     <script src="https://rawgit.com/flatiron/director/master/build/director.min.js"></script>
-
 
   </head>
   <!-- Body-->
@@ -107,10 +112,10 @@
     </div>
     <!-- Off-Canvas Mobile Menu-->
     <div class="offcanvas-container" id="mobile-menu"><a class="account-link" href="account-orders.html">
-        <div class="user-ava"><img src="img/account/user-ava-md.jpg" alt="Daniel Adams">
+        <div class="user-ava"><img src="" alt="">
         </div>
         <div class="user-info">
-          <h6 class="user-name">Daniel Adams</h6><span class="text-sm text-white opacity-60">290 Reward points</span>
+          <h6 class="user-name"></h6><span class="text-sm text-white opacity-60">290 Reward points</span>
         </div></a>
       <nav class="offcanvas-menu">
         <ul class="menu">
@@ -479,17 +484,17 @@
             <div class="account"><a href="account-orders.html"></a><i class="icon-head"></i>
               <ul class="toolbar-dropdown">
                 <li class="sub-menu-user">
-                  <div class="user-ava"><img src="img/account/user-ava-sm.jpg" alt="Daniel Adams">
+                  <div class="user-ava"><img src="" alt="">
                   </div>
                   <div class="user-info">
-                    <h6 class="user-name">Daniel Adams</h6><span class="text-xs text-muted">290 Reward points</span>
+                    <h6 class="user-name"></h6><span class="text-xs text-muted">290 Reward points</span>
                   </div>
                 </li>
                   <li><a href="account-profile.html">My Profile</a></li>
                   <li><a href="account-orders.html">Orders List</a></li>
                   <li><a href="account-wishlist.html">Wishlist</a></li>
                 <li class="sub-menu-separator"></li>
-                <li><a href="#/"> <i class="icon-unlock"></i>Logout</a></li>
+                <li><a id="btn-logout" href="#/"> <i class="icon-unlock"></i>Logout</a></li>
               </ul>
             </div>
             <div class="cart"><a class="route" href="#/cart"></a><i class="icon-bag"></i><span class="count">3</span><span class="subtotal">$289.68</span>

@@ -1,7 +1,7 @@
 window.addEventListener('load', function() {
 
   // buttons
-  var btn_login = document.getElementById('btn-login');
+  // var btn_login = document.getElementById('btn-login');
   var btn_logout = document.getElementById('btn-logout');
 
   // lock object
@@ -25,9 +25,9 @@ window.addEventListener('load', function() {
   };
 
   // listeners for login/logout clicks
-  btn_login.addEventListener('click', function() {
-    lock.show();
-  });
+  // btn_login.addEventListener('click', function() {
+  //   lock.show();
+  // });
 
   btn_logout.addEventListener('click', function() {
     logout();
@@ -58,7 +58,7 @@ window.addEventListener('load', function() {
   // updates UI elements with profile info
   var ShowUserProfile = function(profile) {
 
-    document.getElementById('login').style.display = "none";
+    // document.getElementById('login').style.display = "none";
     document.getElementById('user-menu').style.display = "inline";
 
     document.getElementById('avatar').src = profile.picture;
