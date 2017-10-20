@@ -57,15 +57,9 @@ window.addEventListener('load', function() {
 
   // updates UI elements with profile info
   var ShowUserProfile = function(profile) {
-
-    // document.getElementById('login').style.display = "none";
-    document.getElementById('user-menu').style.display = "inline";
-
-    document.getElementById('avatar').src = profile.picture;
-    document.getElementById('name').textContent = profile.name;
-
-    // document.getElementById('nickname').textContent = profile.nickname;
-    // document.getElementById("profile-form").style.display = "block";
+    // debugger;
+    $('.user-ava img').attr('src', profile.picture);
+    $('.user-name').text(profile.name);
   };
 
   // Shiny message hanlders to receive profile

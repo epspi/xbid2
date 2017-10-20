@@ -1,8 +1,8 @@
 # app.R
-require(jsonlite)
 require(dplyr)
 require(shiny)
 require(shinyjs)
+require(httr)
 source("router.R")
 
 uiIndex <- tagList(
@@ -34,6 +34,32 @@ ui <- htmlTemplate("www/shell.html",
 # ============== SERVER ================
 server <- function(input, output, session) {
   
+  #  ------->> Authentication ---------
+  
+  observe(print(usr_profile()))
+  usr_profile <- eventReactive(input$token, {
+    if(is.null(input$token)) {
+      cat("No token!\n")
+      return(NULL)
+    } else {
+      cat("\ntoken:", input$token, "\n\n")
+      res <- POST(url = "https://epspi.auth0.com/tokeninfo",
+                  body = list(id_token = input$token),
+                  encode = "form")
+      if (res$status_code == 200) {
+        result <- content(res)
+        session$sendCustomMessage("profile_handler", jsonlite::toJSON(result))
+        return(result)
+      } else {
+        session$sendCustomMessage("expired_handler", "")
+        return(NULL)
+      }
+    }
+  })
+  
+  
+  #  ------->> Routing ---------
+  
   path <- reactiveVal("/")
   observeEvent(input$route_clicked, {
     if (input$route_clicked != path()) {
@@ -43,19 +69,15 @@ server <- function(input, output, session) {
   })
   
   route_script <- MakeRouter(routes)
-  cat(route_script)
+  # cat(route_script)
   runjs(route_script)
   
-  #  ------->> Content ---------
   
   # --Body--
   output$body <- renderUI({
     routes[[path()]]
   })
   
-  output$body <- renderUI({
-    routes[[path()]]
-  })
 }
 
 
