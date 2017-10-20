@@ -17,11 +17,15 @@ uiCart <- tagList(
 uiShopGrid <- tagList(
   htmlTemplate("www/_shop-grid-ls.html")
 )
+uiLogin <- tagList(
+  htmlTemplate("www/_account-login.html")
+)
 routes <- list(
   "/" = uiIndex,
   "/cart" = uiCart,
-  "/shop-grid-ls" = uiShopGrid
-) 
+  "/shop-grid-ls" = uiShopGrid,
+  "/login" = uiLogin
+)
 
 # ============== UI ================
 
@@ -74,10 +78,7 @@ server <- function(input, output, session) {
   
   
   # --Body--
-  output$body <- renderUI({
-    routes[[path()]]
-  })
-  
+  output$body <- renderUI(routes[[path()]])
 }
 
 

@@ -57,7 +57,6 @@ window.addEventListener('load', function() {
 
   // updates UI elements with profile info
   var ShowUserProfile = function(profile) {
-    // debugger;
     $('.user-ava img').attr('src', profile.picture);
     $('.user-name').text(profile.name);
   };
