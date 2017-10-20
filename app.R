@@ -1,58 +1,32 @@
 # app.R
 
 require(jsonlite)
-require(httr)
 require(dplyr)
+require(shiny)
 
-## ///////////////////////////////////////////// ##
-## UI ---------------------------------------------
-## ///////////////////////////////////////////// ##
-ui <- htmlTemplate("www/index.html")
+# ============== UI ================
+
+ui <- htmlTemplate("www/shell.html", 
+                   content = uiOutput("body", class = "offcanvas-wrapper")
+)
 
 
-## ///////////////////////////////////////////// ##
-## SERVER -----------------------------------------
-## ///////////////////////////////////////////// ##
+# ============== SERVER ================
 server <- function(input, output, session) {
   
-  # ============================================================
-  ## INPUT TOKEN -----------------------------------------------
-  observe(print(usr_profile()))
   
-  usr_profile <- eventReactive(input$token, {
+  #  ------->> Content ---------
+  
+  # --Body--
+  output$body <- renderUI({
     
-    if(is.null(input$token)) {
-      cat("No token!\n")
-      return(NULL)
-    } else {
-      cat("\ntoken:", input$token, "\n\n")
-      res <- POST(url = "https://epspi.auth0.com/tokeninfo",
-                  body = list(id_token = input$token),
-                  encode = "form")
-      if (res$status_code == 200) {
-        
-        session$sendCustomMessage("profile_handler",
-                                  jsonlite::toJSON(content(res))
-        )
-        
-        result <- content(res)
-        # result$favorites_loc <- result$user_id %>% 
-        #   sha1 %>% 
-        #   file.path(user_data_loc, .) %>% 
-        #   paste0(".csv")
-        # 
-        # favorites$data <- GetFavorites(result)
-        # print(favorites$data)
-        
-        return(result)
-        
-      } else {
-        session$sendCustomMessage("expired_handler", "")
-        return(NULL)
-      }
-    }
+    tagList(
+      # htmlTemplate("www/main_slider.html"),
+      htmlTemplate("www/promo.html"),
+      htmlTemplate("www/top_cats.html"),
+      htmlTemplate("www/footer.html")
+    )
   })
-
 }
 
 
