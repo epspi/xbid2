@@ -12,17 +12,17 @@ window.addEventListener('load', function() {
     }
   });
 
-  // logout function
-  var logout = function() {
-    localStorage.removeItem('id_token');
-    //localStorage.removeItem('profile');
-    window.location.href = AUTH0_CALLBACK_URL;
-  };
-
-  // logout function
+  // Remove token
   var RemoveToken = function(token) {
     localStorage.removeItem('id_token');
   };
+
+  // logout function
+  var logout = function() {
+    RemoveToken('id_token');
+    window.location.href = AUTH0_CALLBACK_URL;
+  };
+
 
   // listeners for login/logout clicks
   // btn_login.addEventListener('click', function() {
@@ -48,6 +48,8 @@ window.addEventListener('load', function() {
     var id_token = localStorage.getItem('id_token');
 
     if (id_token == null) {
+      id_token = ""
+      // $(.account).remove();
       lock.show();
     }
 
