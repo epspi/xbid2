@@ -10,9 +10,15 @@ history.pushState({}, "", "#/");
     }, 0);
   };
 
+  var ShinyRoute = function(route) {
+    setTimeout(function () {
+      Shiny.onInputChange('route_clicked', route);
+    }, 0);
+  };
+
   // define the routing table.
   var routes = {
-    '/' : nofunc
+    '/' : ShinyRoute('/')
     // '/cart': nofunc
   };
 
