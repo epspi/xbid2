@@ -16,8 +16,23 @@ uiIndex <- tagList(
 uiCart <- tagList(
   htmlTemplate("www/_cart.html")
 )
-uiShopGrid <- tagList(
-  htmlTemplate("www/_shop-grid-ls.html")
+uiSearchResults <- tagList(
+  htmlTemplate("www/_search_results.html")
+  # tags$script("
+  #   // Isotope Grid
+  # 	if($('.isotope-grid').length) {
+  #     var $grid = $('.isotope-grid').imagesLoaded(function() {
+  #       $grid.isotope({
+  #         itemSelector: '.grid-item',
+  #         transitionDuration: '0.7s',
+  #         masonry: {
+  #           columnWidth: '.grid-sizer',
+  #           gutter: '.gutter-sizer'
+  #         }
+  #       });
+  #     });
+  #   }"
+  # )
 )
 uiLogin <- tagList(
   htmlTemplate("www/_account-login.html")
@@ -25,7 +40,7 @@ uiLogin <- tagList(
 routes <- list(
   "/" = uiIndex,
   "/cart" = uiCart,
-  "/search" = uiShopGrid,
+  "/search" = uiSearchResults,
   "/login" = uiLogin
 )
 
@@ -47,7 +62,6 @@ server <- function(input, output, session) {
   #  ------->> Startup ---------
   
   curTime  <- Sys.time()
-  print("time")
 
   if (file.exists(timestamp_loc)) {
     lastTime <- GetLastTimestamp(timestamp_loc, kTimeFileFormat)
@@ -56,7 +70,6 @@ server <- function(input, output, session) {
     lastTime <- curTime - auto_refresh_time
     cat("No Scrape History Found!!\n\n")
   }
-  print("print rescrape")
 
   # Status Updates
   cat("Current Time: ", format(curTime, kTimeFileFormat, usetz = T, tz = kTZ), "\n")
@@ -88,7 +101,7 @@ server <- function(input, output, session) {
       return(NULL)
       
     } else {
-      cat("\nid_token:", input$id_token, "\n\n")
+      # cat("\nid_token:", input$id_token, "\n\n")
       # User info using id_token JWT
       res <- POST(url = "https://epspi.auth0.com/tokeninfo",
                   body = list(id_token = input$id_token),
@@ -151,27 +164,40 @@ server <- function(input, output, session) {
   search_res <- reactiveValues(query = NULL, data = NULL)
   
   
-  # ## OBSERVER: Filters
-  # observe({print(input$locSelect)})
-  # filtered_res <- reactive({
-  # 
-  #   res <- search_res$data
-  #   if (!is.null(input$locSelect)) {
-  #     res <- res %>%
-  #       filter(location %in% input$locSelect)
-  #   }
-  #   res
-  # })
-  
   ## OBSERVER: Search input button
-  observeEvent(input$searchSubmit , {
+  observeEvent(input$searchSubmit, {
     shiny::validate(
       need(input$searchText, "" ),
       need(usr_profile(), "Please sign in" )
     )
     search_res$query <- input$searchText
-    print(search_res$query)
   })
+  
+  ## OBSERVER: Do search based on new query
+  observe({
+    search_res$query
+    # input$locSelect
+    validate(
+      need(search_res$query, "Nothing to search for..." )
+    )
+    
+    isolate({
+      search_res$data <- search_res$query %>% 
+        SearchWrapper(search_df = items_df,
+                      join_df = auctions_df,
+                      # favs_df = favorites$data,
+                      favs_df = NULL
+        )
+      
+      # Go to list or grid view depending on result
+      if (nrow(search_res$data) >= kMaxPins) {
+        
+      } else {
+        
+      }
+    })
+  })
+  
   
 }
 
