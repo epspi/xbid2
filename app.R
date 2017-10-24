@@ -37,9 +37,21 @@ uiSearchResults <- tagList(
 uiLogin <- tagList(
   htmlTemplate("www/_account-login.html")
 )
+uiAccountOrders <- tagList(
+  htmlTemplate("www/_account-orders.html")
+)
+uiAccountProfile <- tagList(
+  htmlTemplate("www/_account-profile.html")
+)
+uiAccountWishlist <- tagList(
+  htmlTemplate("www/_account-wishlist.html")
+)
 routes <- list(
   "/" = uiIndex,
   "/cart" = uiCart,
+  "/account-orders" = uiAccountOrders,
+  "/account-profile" = uiAccountProfile,
+  "/account-wishlist" = uiAccountWishlist,
   "/search" = uiSearchResults,
   "/login" = uiLogin
 )
@@ -137,7 +149,7 @@ server <- function(input, output, session) {
   
   # Register routes with director.js
   route_script <- MakeRouter(routes)
-  # cat(route_script)
+  cat(route_script)
   path <- reactiveVal("/")
   runjs(route_script)
   

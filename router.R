@@ -37,7 +37,7 @@ $('document').ready(function() {
         //$('.close-search, .clear-search').click();
       }
   });
-
+  router.init('/');
 });
 "
   
