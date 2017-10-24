@@ -25,7 +25,7 @@ uiLogin <- tagList(
 routes <- list(
   "/" = uiIndex,
   "/cart" = uiCart,
-  "/shop-grid-ls" = uiShopGrid,
+  "/search" = uiShopGrid,
   "/login" = uiLogin
 )
 
@@ -136,8 +136,6 @@ server <- function(input, output, session) {
     }
   })
   
-  
-  
   # --Body--
   output$body <- renderUI({
     if (is.null(usr_profile())) routes[["/login"]] else routes[[path()]]
@@ -145,6 +143,36 @@ server <- function(input, output, session) {
   # output$body <- renderUI({
   #   routes[[path()]]
   # })
+  
+  
+  #  ------->> Search ---------
+  
+  ## REACTIVE: Search result set
+  search_res <- reactiveValues(query = NULL, data = NULL)
+  
+  
+  # ## OBSERVER: Filters
+  # observe({print(input$locSelect)})
+  # filtered_res <- reactive({
+  # 
+  #   res <- search_res$data
+  #   if (!is.null(input$locSelect)) {
+  #     res <- res %>%
+  #       filter(location %in% input$locSelect)
+  #   }
+  #   res
+  # })
+  
+  ## OBSERVER: Search input button
+  observeEvent(input$searchSubmit , {
+    shiny::validate(
+      need(input$searchText, "" ),
+      need(usr_profile(), "Please sign in" )
+    )
+    search_res$query <- input$searchText
+    print(search_res$query)
+  })
+  
 }
 
 

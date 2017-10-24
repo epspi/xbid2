@@ -11,14 +11,6 @@ MakeRouter <- function(routes) {
 $('document').ready(function() {
   // create some functions to be executed when
   // the correct route is issued by the user.
-  //var donothing = function () {};
-  //var allroutes = function() {
-  //  var route = window.location.hash.slice(1);
-  // setTimeout(function () {
-  //    Shiny.onInputChange('route_clicked', route);
-  //  }, 0);
-  //};
-
   var ShinyRoute = function(rt) {
     return function () {setTimeout(function () {
       Shiny.onInputChange('route_clicked', rt);
@@ -33,17 +25,19 @@ $('document').ready(function() {
   
   // instantiate the router.
   var router = Router(routes);
-  
-  // a global configuration setting.
-  router.configure({
-    //on: allroutes,
-    //html5history: true,
-    //run_handler_in_init: false,
-    //convert_hash_in_init: false
+  router.init('/');
+
+  $('#searchText').keypress(function (e) {
+      if (e.which == 13) {
+        setTimeout(function () { 
+          Shiny.onInputChange('searchSubmit', Math.random()); 
+          $('.close-search, .clear-search').click();
+        }, 0);
+        router.setRoute('/search');
+        //$('.close-search, .clear-search').click();
+      }
   });
-  
-  //history.replaceState({}, '', '#%s');
-  router.init();
+
 });
 "
   
