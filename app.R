@@ -41,17 +41,23 @@ server <- function(input, output, session) {
   
   #  ------->> Authentication ---------
   
-  # observe(print(input$token))
-  usr_profile <- eventReactive(input$token, {
-    if(input$token == "") {
+  # observe(print(input$id_token))
+  usr_profile <- eventReactive(input$id_token, {
+    if(input$id_token == "") {
       cat("No token!\n")
       return(NULL)
       
     } else {
-      cat("\ntoken:", input$token, "\n\n")
+      cat("\nid_token:", input$id_token, "\n\n")
+      # User info using id_token JWT
       res <- POST(url = "https://epspi.auth0.com/tokeninfo",
-                  body = list(id_token = input$token),
+                  body = list(id_token = input$id_token),
                   encode = "form")
+      
+      # # User info using access_token
+      # res <- GET(url = "https://epspi.auth0.com/userinfo",
+      #            add_headers(Authorization = paste0("Bearer ", input$access_token))
+      # )
       if (res$status_code == 200) {
         result <- content(res)
         session$sendCustomMessage("profile_handler", jsonlite::toJSON(result))
@@ -62,7 +68,6 @@ server <- function(input, output, session) {
         
       } else {
         session$sendCustomMessage("expired_handler", "")
-        runjs("lock.show();")
         return(NULL)
       }
     }
@@ -79,7 +84,7 @@ server <- function(input, output, session) {
   
   # Register routes with director.js
   route_script <- MakeRouter(routes)
-  cat(route_script)
+  # cat(route_script)
   path <- reactiveVal("/")
   runjs(route_script)
   
