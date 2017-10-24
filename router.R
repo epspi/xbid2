@@ -11,12 +11,19 @@ MakeRouter <- function(routes) {
 $('document').ready(function() {
   // create some functions to be executed when
   // the correct route is issued by the user.
-  var donothing = function () {};
-  var allroutes = function() {
-    var route = window.location.hash.slice(1);
-    setTimeout(function () {
-      Shiny.onInputChange('route_clicked', route);
-    }, 0);
+  //var donothing = function () {};
+  //var allroutes = function() {
+  //  var route = window.location.hash.slice(1);
+  // setTimeout(function () {
+  //    Shiny.onInputChange('route_clicked', route);
+  //  }, 0);
+  //};
+
+  var ShinyRoute = function(rt) {
+    return function () {setTimeout(function () {
+      Shiny.onInputChange('route_clicked', rt);
+      }, 0);
+    }
   };
   
   // define the routing table.
@@ -29,20 +36,22 @@ $('document').ready(function() {
   
   // a global configuration setting.
   router.configure({
-    on: allroutes,
-    html5history: true,
-    // run_handler_in_init: false
-    convert_hash_in_init: false
+    //on: allroutes,
+    //html5history: true,
+    //run_handler_in_init: false,
+    //convert_hash_in_init: false
   });
   
-  history.replaceState({}, '', '#%s');
+  //history.replaceState({}, '', '#%s');
   router.init();
 });
 "
   
   default_route <- names(routes)[1]
-  routing_table <- sapply(names(routes), sprintf, fmt = "'%s' : donothing") %>%
-    paste0(collapse = ",\n  ")
+  routing_table <- sapply(
+    names(routes), 
+    . %>% {sprintf(fmt = "'%s' : ShinyRoute('%s')", ., .)}) %>%
+    paste0(collapse = ",\n    ")
 
   sprintf(routing_script, routing_table, default_route)
 }
