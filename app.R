@@ -4,6 +4,7 @@ require(shiny)
 require(shinyjs)
 require(httr)
 source("router.R")
+source("global.R")
 
 uiIndex <- tagList(
   htmlTemplate("www/main_slider.html"),
@@ -32,12 +33,51 @@ routes <- list(
 
 ui <- htmlTemplate("www/shell.html", 
                    content = uiOutput("body", class = "offcanvas-wrapper"),
-                   # content = uiIndex,
                    document_ = T
 )
 
 # ============== SERVER ================
+
+# Some constants
+auto_refresh_time <- 3600 * .5
+ending_soon_time <- 3600 * 2
+
 server <- function(input, output, session) {
+  
+  #  ------->> Startup ---------
+  
+  curTime  <- Sys.time()
+  print("time")
+
+  if (file.exists(timestamp_loc)) {
+    lastTime <- GetLastTimestamp(timestamp_loc, kTimeFileFormat)
+    cat("Last Scrape:  ", format(lastTime, kTimeFileFormat, usetz = T, tz = kTZ), "\n")
+  } else {
+    lastTime <- curTime - auto_refresh_time
+    cat("No Scrape History Found!!\n\n")
+  }
+  print("print rescrape")
+
+  # Status Updates
+  cat("Current Time: ", format(curTime, kTimeFileFormat, usetz = T, tz = kTZ), "\n")
+  cat("Refresh Due:  ",format(lastTime + auto_refresh_time, kTimeFileFormat,
+                              usetz = T, tz = "EST5EDT"), "\n\n")
+
+  # Rescrape if due time
+  if (curTime >= lastTime + auto_refresh_time) Rescrape()
+
+  # Filter out auctions that have already passed
+  # Make sure auction expiration has right time zone
+  # After loading auctions, filter out those which have expired
+  auctions_df  <-  ReadAuctionsCSV(auctions_loc, kTimeFileFormat) %>%
+    filter(date + kExpiredTimeOffset > curTime)
+
+  # Filter out items from auctions that have passed
+  items_df  <- ReadItemsCSV(items_loc) %>%
+    filter(auction_id %in% auctions_df$auction_id) %>%
+    mutate(MSRP = as.numeric(MSRP))
+
+  
   
   #  ------->> Authentication ---------
   
