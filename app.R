@@ -147,7 +147,7 @@ server <- function(input, output, session) {
   
   # Register routes with director.js
   route_script <- MakeRouter(routenames)
-  # cat(route_script)
+  cat(route_script)
   path <- reactiveVal("/")
   runjs(route_script)
   
@@ -218,6 +218,12 @@ server <- function(input, output, session) {
       }
     })
   })
+  
+  # observe({print(names(session$clientData))})
+  observe({cat("url hash:", session$clientData$url_hash, "\n",
+               "url hash initial:", session$clientData$url_hash_initial, "\n")})
+  
+  observe({cat("url_search:", session$clientData$url_search, "\n")})
   
   
 }

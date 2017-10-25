@@ -23,7 +23,9 @@ $('document').ready(function() {
           Shiny.onInputChange('searchSubmit', Math.random()); 
           $('.close-search, .clear-search').click();
         }, 0);
-        router.setRoute('/search');
+        var term = $('#searchText').val();
+        alert(term);
+        router.setRoute('/search?term=' + term);
       }
   });
   router.init('/');
