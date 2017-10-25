@@ -28,7 +28,7 @@
           <option>Avarage Rating</option>
           <option>A - Z Order</option>
           <option>Z - A Order</option>
-        </select><span class="text-muted">Showing:&nbsp;</span><span>1 - 12 items</span>
+        </select><span class="text-muted">Showing:&nbsp;</span><span>1 - {{n_items}} items</span>
       </div>
     </div>
     <div class="column">
@@ -39,7 +39,7 @@
   <div class="isotope-grid cols-4 mb-2">
     <div class="gutter-sizer"></div>
     <div class="grid-sizer"></div>
-    {{products_grid}}
+    {{products}}
   </div>
   <script>
   // Isotope Grid

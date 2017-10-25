@@ -127,6 +127,7 @@ AppendCSV <- function(data, location){
 ## ///////////////////////////////////////////// ##
 ## HELPER FUNCTIONS--------------------------------
 ## ///////////////////////////////////////////// ##
+enclose <- function(f) f()
 SettingInput <- function(inputID,
                          label,
                          description,
@@ -618,6 +619,28 @@ dropdownFavsMenu <- function(...,
           )
   )
 }
+GenProductsGrid <- function(template_str, res) {
+  sprintf(template_str,
+          res$link.item,
+          res$img_src,
+          res$link.item,
+          res$Item,
+          res$MSRP) %>% 
+    paste0(collapse="") %>%
+    HTML
+}
+GenProductsList <- function(template_str, res) {
+  sprintf(template_str,
+          res$link.item,
+          res$img_src,
+          res$link.item,
+          res$Item,
+          res$MSRP,
+          res$Description) %>% 
+    paste0(collapse="") %>%
+    HTML
+}
+
 
 
 ## ///////////////////////////////////////////// ##
@@ -641,7 +664,7 @@ Rescrape <- function(use.progress = T) {
   ### GET NEW LINKS
   # Reading in old auction links and comparing with currently-available links.
   # We only scrape links not previously known!
-  current_links  <- ScrapeCurrentLinks2() %>% unique %>% sample(20)
+  current_links  <- ScrapeCurrentLinks2() %>% unique
   new_links <- if (file.exists(known_links_loc)) {
     read.csv(known_links_loc, header = F, stringsAsFactors = F)[,1] %>%
       setdiff(current_links, .)
