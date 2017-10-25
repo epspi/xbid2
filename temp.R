@@ -6,7 +6,13 @@ htmlTemplate(text_ = html_str2, document_ = F,
              short_desc = "some cool product",
              msrp = "223.53"
 )
-
+ui_closure <- function(template) {
+  html_text <- readr::read_file(template)
+  
+  function(...) {
+    htmlTemplate(text_ = html_text, document_ = F, ...)
+  }
+}
 GenProductsGrid <- function(products, template) {
   products %>%
     apply(1, function(product) {
@@ -19,7 +25,30 @@ GenProductsGrid <- function(products, template) {
     })
 }
 
-renderRoute <- function() {
-
-
+sprintf_factory <- function(template, reactive){
+  text <- readr::read_file(template)
+  
+  function() {
+    res <- reactive()
+    
+    sprintf(text,
+            strftime(res$date, format = "%a %r", tz = kTZ),
+            res$link.item, 
+            res$img_src,
+            res$description_html, 
+            res$buttons_html)
+  }
 }
+
+sprintf_factory("www/_grid_product_sprintf.html")
+
+GenProductsGrid <- function(template_str, res) {
+  sprintf(template_str,
+          res$link.item,
+          res$img_src,
+          res$link.item,
+          res$Item,
+          res$MSRP
+  )
+}
+  
