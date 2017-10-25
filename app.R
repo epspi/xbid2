@@ -17,7 +17,8 @@ uiCart <- tagList(
   htmlTemplate("www/_cart.html")
 )
 uiSearchResults <- tagList(
-  htmlTemplate("www/_search_results.html")
+  htmlTemplate("www/_search_results.html", 
+               products_grid = "")
   # tags$script("
   #   // Isotope Grid
   # 	if($('.isotope-grid').length) {
