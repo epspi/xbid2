@@ -58,7 +58,7 @@ routenames <- list(
 # ============== UI ================
 
 ui <- htmlTemplate("www/shell.html", 
-                   content = uiOutput("body", class = "offcanvas-wrapper"),
+                   content = uiOutput("inner", class = "offcanvas-wrapper"),
                    document_ = T)
 
 # ============== SERVER ================
@@ -89,97 +89,76 @@ server <- function(input, output, session) {
   # --User Profile--
   # observe(print(input$id_token))
   usr_profile <- eventReactive(input$id_token, {
+    
     if(input$id_token == "") {
       cat("No token!\n")
       return(NULL)
       
     } else {
-      # cat("\nid_token:", input$id_token, "\n\n")
+      
       # User info using id_token JWT
       res <- POST(url = "https://epspi.auth0.com/tokeninfo",
                   body = list(id_token = input$id_token),
                   encode = "form")
       
-      # # User info using access_token
-      # res <- GET(url = "https://epspi.auth0.com/userinfo",
-      #            add_headers(Authorization = paste0("Bearer ", input$access_token))
-      # )
       if (res$status_code == 200) {
+        
         result <- content(res)
         session$sendCustomMessage("profile_handler", jsonlite::toJSON(result))
         cat("LOGGED IN PROFILE:\n")
         # print(result)
         print(jsonlite::toJSON(result, pretty = 4, auto_unbox = T))
         return(result)
-        
       } else {
+        
         session$sendCustomMessage("expired_handler", "")
         return(NULL)
       }
     }
   })
   
-  # Modify dom for logged-off users
-  # (Shouldn't be necessary as authentication automatically pops up)
-  observe({
-    if(is.null(usr_profile())) {
-      runjs("$('.account, .cart').remove();")
-    }
+
+  #  ------->> Routing ---------
+  home_path <- "/"
+  
+  # --React to hash / clean--
+  path <- reactive({
+    
+    validate(need(usr_profile(), "Please sign in" ))
+    session$clientData$url_hash %>% 
+      gsub("#", "", .) %>% 
+      ifelse(. == "", home_path, .)
   })
   
-  
-  #  ------->> Routing ---------
-  # Set the initial starting location
-  initial_path <- "/"
-  path <- reactiveVal(initial_path)
-  
-  # --Hash observer--
-  observe({
-    shiny::validate(
-      # need(input$searchText, "" ),
-      need(usr_profile(), "Please sign in" )
-    )
+  # --React to new clean path--
+  route <- reactive({
     
-    hash <- session$clientData$url_hash
-    newpath <- gsub("#", "", hash)
-    newpath <- ifelse(newpath == "", "/", newpath)
+    path <- path()
+    route <- gsub("[?].*", "", path)
+    cat("\n--New URL--\nRoute:", route, "\n")
     
-    # If url changed
-    if (newpath != path()) {
-      route <- gsub("[?].*", "", newpath)
-      cat("\n--New URL--\nRoute:", route, "\n")
-      
-      # Search submission
-      if (route == "/search") {
-        q <- parseQueryString(gsub(".*[?]", "", newpath))
-        cat("Query:\n ", 
-            paste(names(q), unlist(q), sep = "=", collapse = "\n  "), "\n")
-        last_query(q$term)
-      }
-      path(route)
+    # Check for query args in Search submission 
+    if (route == "/search") {
+      q <- parseQueryString(gsub(".*[?]", "", path))
+      cat("Query:\n ", 
+          paste(names(q), unlist(q), sep = "=", collapse = "\n  "), "\n")
+      last_query(q$term)
     }
+    return(route)
   })
   
   # --Server routed page--
-  output$body <- renderUI({
-    shiny::validate(
-      need(usr_profile(), "Please sign in" )
-    )
+  output$inner <- renderUI({
     
-    route <- path()
-
-    switch(route,
+    switch(route(),
            "/" = uiIndex,
            "/cart" = uiCart(),
            "/account-orders" = uiAccountOrders(),
            "/account-profile" = uiAccountProfile(),
            "/account-wishlist" = uiAccountWishlist(),
-           "/search" = uiSearchResults(search_res$data, 
-                                       search_res$grid,
-                                       search_res$filters),
+           "/search" = uiSearchResults(filtered_res(), grid_view()),
            "/login" = uiLogin(),
-           ""
-    )
+           "")
   })
   
   
@@ -187,32 +166,36 @@ server <- function(input, output, session) {
   
   # --Search result set--
   last_query <- reactiveVal(NULL)
-  search_res <- reactiveValues(data = NULL, grid = T, filters = NULL)
+  grid_view <- reactiveVal(TRUE)
+  search_options <- reactiveValues()
   
   # --Do Search--
-  observe({
-    validate(
-      need(last_query(), "Nothing to search for..." )
-    )
+  search_res <- reactive({
+    
+    validate(need(last_query(), "Nothing to search for..." ))
     isolate({
-      search_res$data <- last_query() %>% 
-        SearchWrapper(search_df = items_df,
-                      join_df = auctions_df,
-                      # favs_df = favorites$data,
-                      favs_df = NULL
-        )
+      result <- SearchWrapper(last_query(), 
+                              search_df = items_df,
+                              join_df = auctions_df,
+                              # favs_df = favorites$data,
+                              favs_df = NULL)
       
       # Go to list or grid view depending on result
-      if (nrow(search_res$data) >= kMaxPins) {
-        
-      } else {
-        
-      }
+      grid_view(!(nrow(result) >= kMaxPins))
+      return(result)
     })
   })
   
-  
-  
+  filtered_res <- reactive({
+    
+    res <- search_res()
+    if (is.null(search_options)) {
+      res
+    } else {
+      res
+    }
+      
+  })
 }
 
 
