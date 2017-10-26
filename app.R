@@ -9,11 +9,11 @@ source("global.R")
 
 # Server-side rendered content definitions
 uiSearchResults <- enclose(function() {
-    grid_template <- read_file("www/_grid_product_sprintf.html")
-    list_template <- read_file("www/_list_product_sprintf.html")
-    search_template_grid <- read_file("www/_search_results.html")
-    search_template_list <- read_file("www/_search_results_list.html")
-    
+  grid_template <- read_file("www/_grid_product_sprintf.html")
+  list_template <- read_file("www/_list_product_sprintf.html")
+  search_template_grid <- read_file("www/_search_results.html")
+  search_template_list <- read_file("www/_search_results_list.html")
+  
   function(search_res, grid = T) {
     if (grid) {
       htmlTemplate(
@@ -30,11 +30,13 @@ uiSearchResults <- enclose(function() {
     }
   }
 })
+
 uiIndex <- tagList(
   htmlTemplate("www/_main_slider.html"),
   htmlTemplate("www/_promo.html"),
   htmlTemplate("www/_top_cats.html")
 )
+
 uiCart <- function() htmlTemplate("www/_cart.html")
 uiLogin <- function() htmlTemplate("www/_account-login.html")
 uiAccountOrders <- function() htmlTemplate("www/_account-orders.html")
@@ -51,45 +53,26 @@ routenames <- list(
   "/login"
 )
 
+
+
 # ============== UI ================
 
 ui <- htmlTemplate("www/shell.html", 
                    content = uiOutput("body", class = "offcanvas-wrapper"),
-                   document_ = T
-)
+                   document_ = T)
 
 # ============== SERVER ================
 
-# Some constants
-auto_refresh_time <- 3600 * .5
-ending_soon_time <- 3600 * 2
-
 server <- function(input, output, session) {
+  
   
   #  ------->> Startup ---------
   
+  # Check if rescrape needed
   curTime  <- Sys.time()
+  CheckRescrapeDue(curTime)
   
-  if (file.exists(timestamp_loc)) {
-    lastTime <- GetLastTimestamp(timestamp_loc, kTimeFileFormat)
-    cat("Last Scrape:  ", 
-        format(lastTime, kTimeFileFormat, usetz = T, tz = kTZ), "\n")
-  } else {
-    lastTime <- curTime - auto_refresh_time
-    cat("No Scrape History Found!!\n\n")
-  }
-  
-  # Status Updates
-  cat("Current Time: ", 
-      format(curTime, kTimeFileFormat, usetz = T, tz = kTZ), "\n")
-  cat("Refresh Due:  ",
-      format(lastTime + auto_refresh_time, kTimeFileFormat,
-             usetz = T, tz = "EST5EDT"), "\n\n")
-  
-  # Rescrape if due time
-  if (curTime >= lastTime + auto_refresh_time) Rescrape()
-  
-  # Filter out auctions that have already passed
+  ## Read in data
   # Make sure auction expiration has right time zone
   # After loading auctions, filter out those which have expired
   auctions_df  <-  ReadAuctionsCSV(auctions_loc, kTimeFileFormat) %>%
@@ -101,9 +84,9 @@ server <- function(input, output, session) {
     mutate(MSRP = as.numeric(MSRP))
   
   
-  
   #  ------->> Authentication ---------
   
+  # --User Profile--
   # observe(print(input$id_token))
   usr_profile <- eventReactive(input$id_token, {
     if(input$id_token == "") {
@@ -136,6 +119,8 @@ server <- function(input, output, session) {
     }
   })
   
+  # Modify dom for logged-off users
+  # (Shouldn't be necessary as authentication automatically pops up)
   observe({
     if(is.null(usr_profile())) {
       runjs("$('.account, .cart').remove();")
@@ -144,18 +129,34 @@ server <- function(input, output, session) {
   
   
   #  ------->> Routing ---------
+  # Set the initial starting location
+  initial_path <- "/"
+  path <- reactiveVal(initial_path)
   
-  # Register routes with director.js
-  route_script <- MakeRouter(routenames)
-  cat(route_script)
-  path <- reactiveVal("/")
-  runjs(route_script)
-  
-  
-  observeEvent(input$route_clicked, {
-    if (input$route_clicked != path()) {
-      cat("route:", input$route_clicked, "\n")
-      path(input$route_clicked)
+  # --Hash observer--
+  observe({
+    shiny::validate(
+      # need(input$searchText, "" ),
+      need(usr_profile(), "Please sign in" )
+    )
+    
+    hash <- session$clientData$url_hash
+    newpath <- gsub("#", "", hash)
+    newpath <- ifelse(newpath == "", "/", newpath)
+    
+    # If url changed
+    if (newpath != path()) {
+      route <- gsub("[?].*", "", newpath)
+      cat("\n--New URL--\nRoute:", route, "\n")
+      
+      # Search submission
+      if (route == "/search") {
+        q <- parseQueryString(gsub(".*[?]", "", newpath))
+        cat("Query:\n ", 
+            paste(names(q), unlist(q), sep = "=", collapse = "\n  "), "\n")
+        last_query(q$term)
+      }
+      path(route)
     }
   })
   
@@ -166,13 +167,16 @@ server <- function(input, output, session) {
     )
     
     route <- path()
+
     switch(route,
            "/" = uiIndex,
            "/cart" = uiCart(),
            "/account-orders" = uiAccountOrders(),
            "/account-profile" = uiAccountProfile(),
            "/account-wishlist" = uiAccountWishlist(),
-           "/search" = uiSearchResults(search_res$data),
+           "/search" = uiSearchResults(search_res$data, 
+                                       search_res$grid,
+                                       search_res$filters),
            "/login" = uiLogin(),
            ""
     )
@@ -181,29 +185,17 @@ server <- function(input, output, session) {
   
   #  ------->> Search ---------
   
-  ## REACTIVE: Search result set
-  search_res <- reactiveValues(query = NULL, data = NULL)
+  # --Search result set--
+  last_query <- reactiveVal(NULL)
+  search_res <- reactiveValues(data = NULL, grid = T, filters = NULL)
   
-  
-  ## OBSERVER: Search input button
-  observeEvent(input$searchSubmit, {
-    shiny::validate(
-      need(input$searchText, "" ),
-      need(usr_profile(), "Please sign in" )
-    )
-    search_res$query <- input$searchText
-  })
-  
-  ## OBSERVER: Do search based on new query
+  # --Do Search--
   observe({
-    search_res$query
-    # input$locSelect
     validate(
-      need(search_res$query, "Nothing to search for..." )
+      need(last_query(), "Nothing to search for..." )
     )
-    
     isolate({
-      search_res$data <- search_res$query %>% 
+      search_res$data <- last_query() %>% 
         SearchWrapper(search_df = items_df,
                       join_df = auctions_df,
                       # favs_df = favorites$data,
@@ -219,12 +211,6 @@ server <- function(input, output, session) {
     })
   })
   
-  # observe({print(names(session$clientData))})
-  observe({cat("url hash:", session$clientData$url_hash)})
-  # , "\n",
-  #              "url hash initial:", session$clientData$url_hash_initial, "\n")})
-  # 
-  observe({cat("url_search:", session$clientData$url_search, "\n")})
   
   
 }

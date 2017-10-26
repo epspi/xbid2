@@ -41,6 +41,8 @@ searches_loc <- "data/log/searches.csv"
 kExpiredTimeOffset <- 1800
 kTimeFileFormat  <- "%Y-%m-%d %H:%M:%S"
 kTZ <- 'EST5EDT'
+auto_refresh_time <- 3600 * .5
+ending_soon_time <- 3600 * 2
 
 # UI Constants
 kMaxPins <- 150
@@ -397,7 +399,7 @@ DoSearch <- function(search_string,
                        paste0("\\W(", search_string, ')\\W'), 
                        search_string)
     # print(grep_str)
-    cat("\nSearching:", grep_str)
+    cat("Searching:", grep_str, "\n")
     
     grepl(grep_str, df[[col.name]], ignore.case = T) %>%
       df[.,]
@@ -412,7 +414,7 @@ DoSearch <- function(search_string,
       }) %>% unlist
     
     # print(grep_str)
-    cat("\nSearching:", grep_str, "\n")
+    cat("Searching:", grep_str, "\n")
     
     sapply(grep_str, grepl, df[[col.name]], ignore.case = T) %>%
       apply(1, all) %>%
@@ -757,6 +759,28 @@ Rescrape <- function(use.progress = T) {
   write.table(current_links, known_links_loc, sep = ",", row.names = F, col.names = F )
   
   cat("\n|----- ENDED RESCRAPE -----|\n")
+}
+CheckRescrapeDue <- function(curTime) {
+  
+  if (file.exists(timestamp_loc)) {
+    lastTime <- GetLastTimestamp(timestamp_loc, kTimeFileFormat)
+    cat("Last Scrape:  ", 
+        format(lastTime, kTimeFileFormat, usetz = T, tz = kTZ), "\n")
+    
+  } else {
+    lastTime <- curTime - auto_refresh_time
+    cat("No Scrape History Found!!\n\n")
+  }
+  
+  # Status Updates
+  cat("Current Time: ", 
+      format(curTime, kTimeFileFormat, usetz = T, tz = kTZ), "\n")
+  cat("Refresh Due:  ",
+      format(lastTime + auto_refresh_time, kTimeFileFormat,
+             usetz = T, tz = "EST5EDT"), "\n\n")
+  
+  # Rescrape if due time
+  if (curTime >= lastTime + auto_refresh_time) Rescrape()
 }
 ScrapeCurrentLinks <- function() {
   read_html("http://bidfta.com/") %>%
