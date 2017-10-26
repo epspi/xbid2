@@ -26,9 +26,6 @@
     <!-- Shiny-->
     {{ headContent() }}
     {{ useShinyjs() }}
-    <!-- Director router -->
-    <script src="https://rawgit.com/flatiron/director/master/build/director.min.js"></script>
-
   </head>
   <!-- Body-->
   <body>
@@ -209,11 +206,10 @@
     <!-- Remove "navbar-sticky" class to make navigation bar scrollable with the page.-->
     <header class="navbar navbar-sticky">
       <!-- Search-->
-      <form class="site-search" method="get">
+      <form class="site-search">
         <input id="searchText" type="text" name="site_search" placeholder="Type to search...">
         <div class="search-tools">
           <span class="clear-search">Clear</span>
-          <!-- <span hidden id="searchSubmit" class="submit-search"><i class="icon-search"></i></span> -->
           <span class="close-search"><i class="icon-cross"></i></span>
         </div>
       </form>
@@ -369,16 +365,14 @@
     <!-- Back To Top Button--><a class="scroll-to-top-btn" href="#/"><i class="icon-arrow-up"></i></a>
     <!-- Backdrop-->
     <div class="site-backdrop"></div>
-    <!-- Auth0 supporting functions -->
-    <script src="js/auth0.min.js"></script>
-    <script src="js/auth0-variables.js"></script>
-    <script src="js/auth0_func.js"></script>
-    <!-- <script src="js/router.js"></script> -->
 
     <!-- JavaScript (jQuery) libraries, plugins and custom scripts-->
     <script src="js/vendor.min.js"></script>
     <script src="js/scripts.js"></script>
     <script src="js/app.js"></script>
-
+    <!-- Auth0 supporting functions -->
+    <script src="js/auth0.min.js"></script>
+    <script src="js/auth0-variables.js"></script>
+    <script src="js/auth0_func.js"></script>
   </body>
 </html>
