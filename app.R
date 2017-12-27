@@ -9,24 +9,32 @@ source("global.R")
 
 # Server-side rendered content definitions
 uiSearchResults <- enclose(function() {
-  grid_template <- read_file("www/_grid_product_sprintf.html")
+  grid_product <- read_file("www/_grid_product_sprintf.html")
+  grid_layout <- read_file("www/_grid_isotope.html")
   list_template <- read_file("www/_list_product_sprintf.html")
-  search_template_grid <- read_file("www/_search_results.html")
-  search_template_list <- read_file("www/_search_results_list.html")
+  search_template2 <- read_file("www/_search_results2.html")
+  range_slider_template <- read_file("www/_slider.html")
   
-  function(search_res, grid = T) {
+  function(search_res, query, opt, grid = T) {
+    
+    page <- opt$page
+    page_size <- opt$page_size
+    
+    template_func <- function(products) {
+      htmlTemplate(
+        text_ = search_template2, 
+        search_term = query,
+        n_items = nrow(search_res),
+        products =  products, 
+        pagination = GenPagination(search_res, page, page_size),
+        filters = GenFilters(range_slider_template, search_res),
+        document_ = F)
+    }
+    
     if (grid) {
-      htmlTemplate(
-        text_ = search_template_grid, 
-        n_items = nrow(search_res),
-        products =  GenProductsGrid(grid_template, search_res), 
-        document_ = F)
+      template_func(GenProductsGrid(grid_product, search_res))
     } else {
-      htmlTemplate(
-        text_ = search_template_list, 
-        n_items = nrow(search_res),
-        products =  GenProductsList(list_template, search_res), 
-        document_ = F)
+      template_func(GenProductsList(list_template, search_res))
     }
   }
 })
@@ -139,11 +147,16 @@ server <- function(input, output, session) {
     
     # Check for query args in Search submission 
     if (route == "/search") {
+      
       q <- parseQueryString(gsub(".*[?]", "", path))
       cat("Query:\n ", 
           paste(names(q), unlist(q), sep = "=", collapse = "\n  "), "\n")
-      last_query(q$term)
+      
+      # Update reactive values (bad style?)
+      if ("term" %in% names(q)) last_query(q$term)
+      if ("page" %in% names(q)) search_options$page <- q$page
     }
+    
     return(route)
   })
   
@@ -156,7 +169,9 @@ server <- function(input, output, session) {
            "/account-orders" = uiAccountOrders(),
            "/account-profile" = uiAccountProfile(),
            "/account-wishlist" = uiAccountWishlist(),
-           "/search" = uiSearchResults(filtered_res(), grid_view()),
+           "/search" = uiSearchResults(paginated_res(), 
+                                       last_query(), search_options, 
+                                       grid_view()),
            "/login" = uiLogin(),
            "")
   })
@@ -167,7 +182,11 @@ server <- function(input, output, session) {
   # --Search result set--
   last_query <- reactiveVal(NULL)
   grid_view <- reactiveVal(TRUE)
-  search_options <- reactiveValues()
+  search_options <- reactiveValues(
+    page = 1,
+    page_size = 12
+  )
+  
   
   # --Do Search--
   search_res <- reactive({
@@ -186,16 +205,7 @@ server <- function(input, output, session) {
     })
   })
   
-  filtered_res <- reactive({
-    
-    res <- search_res()
-    if (is.null(search_options)) {
-      res
-    } else {
-      res
-    }
-      
-  })
+  paginated_res <- reactive({search_res()})
 }
 
 

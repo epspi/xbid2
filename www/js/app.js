@@ -4,7 +4,9 @@ $('document').ready(function() {
   var searchText = $('#searchText')
   searchText.keypress(function (e) {
     if (e.which == 13) {
-      window.location.href = '#/search?term=' + searchText.val();
+      window.location.href = '#/search?term=' +
+        searchText.val() +
+        '&page=1';
       $('.close-search, .clear-search').click();
     }
   });

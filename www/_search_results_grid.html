@@ -28,11 +28,24 @@
           <option>Avarage Rating</option>
           <option>A - Z Order</option>
           <option>Z - A Order</option>
-        </select><span class="text-muted">Showing:&nbsp;</span><span>1 - {{n_items}} items</span>
+        </select>
+        <label for="sorting">Items:</label>
+        <select class="form-control" id="page_size">
+          <option>12</option>
+          <option>25</option>
+          <option>50</option>
+        </select>
+        <span class="text-muted">Showing:&nbsp;</span><span>1 - {{n_items}} items</span>
       </div>
     </div>
     <div class="column">
-      <div class="shop-view"><a class="grid-view active" href="shop-grid-ns.html"><span></span><span></span><span></span></a><a class="list-view" href="shop-list-ns.html"><span></span><span></span><span></span></a></div>
+      <div class="shop-sorting">
+        </div>    
+    </div>
+    <div class="column">
+      <div class="shop-view">
+        <a class="grid-view active" href="shop-grid-ns.html"><span></span><span></span><span></span></a>
+        <a class="list-view" href="shop-list-ns.html"><span></span><span></span><span></span></a></div>
     </div>
   </div>
   <!-- Products Grid-->
@@ -58,14 +71,9 @@
   <!-- Pagination-->
   <nav class="pagination">
     <div class="column">
-      <ul class="pages">
-        <li class="active"><a href="#">1</a></li>
-        <li><a href="#">2</a></li>
-        <li><a href="#">3</a></li>
-        <li><a href="#">4</a></li>
-        <li>...</li>
-        <li><a href="#">12</a></li>
-      </ul>
+        <ul class="pages">
+          {{pagination}}
+        </ul>
     </div>
     <div class="column text-right hidden-xs-down"><a class="btn btn-outline-secondary btn-sm" href="#">Next&nbsp;<i class="icon-arrow-right"></i></a></div>
   </nav>

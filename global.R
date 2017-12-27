@@ -621,14 +621,25 @@ dropdownFavsMenu <- function(...,
           )
   )
 }
-GenProductsGrid <- function(template_str, res) {
-  sprintf(template_str,
+GenProductsGrid <- function(product_str, res) {
+  
+  layout_str <- 
+  '<!-- Products Grid-->
+  <div class="isotope-grid cols-3 mb-2">
+    <div class="gutter-sizer"></div>
+    <div class="grid-sizer"></div>
+    %s
+  </div>'
+  
+  sprintf(product_str,
+          res$location,
           res$link.item,
           res$img_src,
           res$link.item,
           res$Item,
           res$MSRP) %>% 
-    paste0(collapse="") %>%
+    paste0(collapse="") %>% 
+    sprintf(layout_str, .) %>%
     HTML
 }
 GenProductsList <- function(template_str, res) {
@@ -642,7 +653,58 @@ GenProductsList <- function(template_str, res) {
     paste0(collapse="") %>%
     HTML
 }
+GenPagination <- function(sorted_res, page, page_size = 12) {
+  page <- as.integer(page)
+  pages <- 1:ceiling(nrow(sorted_res) / page_size)
+  classes <- character(length(pages))
+  classes[page] <- ' class = "active"'
+  sprintf('<li%s><a href="#">%s</a></li>', classes, pages) %>% 
+    paste0(collapse = "") %>% 
+    HTML
+}
+GenRangeSlider <- function(template_str, res) {
+  template_str %>% 
+    HTML
+}
+GenLocationsFilter <- function(res) {
+  
+  loc <- count(res, location, sort = T) %>% 
+    mutate(pretty_loc = gsub("(^[0-9]* )|(,.*$)", "", location))
+  
+  input_id <- "filter_loc"
+  loc_item <- 
+  '<label class="custom-control custom-checkbox d-block">
+    <input class="custom-control-input" type="checkbox" name="%s" value="%s">
+    <span class="custom-control-indicator"></span>
+    <span class="custom-control-description">%s&nbsp;
+      <span class="text-muted">(%s)</span>
+    </span>
+  </label>'
+  
+  loc_wrapper <- 
+  '<!-- Widget Location Filter-->
+  <section class="widget option-set" data-group="location">
+    <h3 class="widget-title">Locations</h3>%s
+  </section>'
+  
+  checkbox <- sprintf(loc_item,
+                      input_id,
+                      loc$location,
+                      loc$pretty_loc,
+                      loc$n) %>%
+    paste0(collapse="") %>%
+    sprintf(loc_wrapper, .) %>% 
+    HTML
 
+}
+GenFilters <- function(slider_template, res) {
+  
+  print(count(res, Condition))
+  
+  locations <- GenLocationsFilter(res)
+  slider <- GenRangeSlider(slider_template, res)
+  list(locations, slider)
+}
 
 
 ## ///////////////////////////////////////////// ##
