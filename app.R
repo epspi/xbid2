@@ -9,24 +9,32 @@ source("global.R")
 
 # Server-side rendered content definitions
 uiSearchResults <- enclose(function() {
-  grid_template <- read_file("www/_grid_product_sprintf.html")
+  grid_product <- read_file("www/_grid_product_sprintf.html")
+  grid_layout <- read_file("www/_grid_isotope.html")
   list_template <- read_file("www/_list_product_sprintf.html")
-  search_template_grid <- read_file("www/_search_results.html")
-  search_template_list <- read_file("www/_search_results_list.html")
+  search_template2 <- read_file("www/_search_results2.html")
+  range_slider_template <- read_file("www/_slider.html")
   
-  function(search_res, grid = T) {
+  function(search_res, query, opt, grid = T) {
+    
+    page <- opt$page
+    page_size <- opt$page_size
+    
+    template_func <- function(products) {
+      htmlTemplate(
+        text_ = search_template2, 
+        search_term = query,
+        n_items = nrow(search_res),
+        products =  products, 
+        pagination = GenPagination(search_res, page, page_size),
+        filters = GenFilters(range_slider_template, search_res),
+        document_ = F)
+    }
+    
     if (grid) {
-      htmlTemplate(
-        text_ = search_template_grid, 
-        n_items = nrow(search_res),
-        products =  GenProductsGrid(grid_template, search_res), 
-        document_ = F)
+      template_func(GenProductsGrid(grid_product, search_res))
     } else {
-      htmlTemplate(
-        text_ = search_template_list, 
-        n_items = nrow(search_res),
-        products =  GenProductsList(list_template, search_res), 
-        document_ = F)
+      template_func(GenProductsList(list_template, search_res))
     }
   }
 })
@@ -58,7 +66,7 @@ routenames <- list(
 # ============== UI ================
 
 ui <- htmlTemplate("www/shell.html", 
-                   content = uiOutput("body", class = "offcanvas-wrapper"),
+                   content = uiOutput("inner", class = "offcanvas-wrapper"),
                    document_ = T)
 
 # ============== SERVER ================
@@ -89,97 +97,83 @@ server <- function(input, output, session) {
   # --User Profile--
   # observe(print(input$id_token))
   usr_profile <- eventReactive(input$id_token, {
+    
     if(input$id_token == "") {
       cat("No token!\n")
       return(NULL)
       
     } else {
-      # cat("\nid_token:", input$id_token, "\n\n")
+      
       # User info using id_token JWT
       res <- POST(url = "https://epspi.auth0.com/tokeninfo",
                   body = list(id_token = input$id_token),
                   encode = "form")
       
-      # # User info using access_token
-      # res <- GET(url = "https://epspi.auth0.com/userinfo",
-      #            add_headers(Authorization = paste0("Bearer ", input$access_token))
-      # )
       if (res$status_code == 200) {
+        
         result <- content(res)
         session$sendCustomMessage("profile_handler", jsonlite::toJSON(result))
         cat("LOGGED IN PROFILE:\n")
         # print(result)
         print(jsonlite::toJSON(result, pretty = 4, auto_unbox = T))
         return(result)
-        
       } else {
+        
         session$sendCustomMessage("expired_handler", "")
         return(NULL)
       }
     }
   })
   
-  # Modify dom for logged-off users
-  # (Shouldn't be necessary as authentication automatically pops up)
-  observe({
-    if(is.null(usr_profile())) {
-      runjs("$('.account, .cart').remove();")
-    }
+
+  #  ------->> Routing ---------
+  home_path <- "/"
+  
+  # --React to hash / clean--
+  path <- reactive({
+    
+    validate(need(usr_profile(), "Please sign in" ))
+    session$clientData$url_hash %>% 
+      gsub("#", "", .) %>% 
+      ifelse(. == "", home_path, .)
   })
   
-  
-  #  ------->> Routing ---------
-  # Set the initial starting location
-  initial_path <- "/"
-  path <- reactiveVal(initial_path)
-  
-  # --Hash observer--
-  observe({
-    shiny::validate(
-      # need(input$searchText, "" ),
-      need(usr_profile(), "Please sign in" )
-    )
+  # --React to new clean path--
+  route <- reactive({
     
-    hash <- session$clientData$url_hash
-    newpath <- gsub("#", "", hash)
-    newpath <- ifelse(newpath == "", "/", newpath)
+    path <- path()
+    route <- gsub("[?].*", "", path)
+    cat("\n--New URL--\nRoute:", route, "\n")
     
-    # If url changed
-    if (newpath != path()) {
-      route <- gsub("[?].*", "", newpath)
-      cat("\n--New URL--\nRoute:", route, "\n")
+    # Check for query args in Search submission 
+    if (route == "/search") {
       
-      # Search submission
-      if (route == "/search") {
-        q <- parseQueryString(gsub(".*[?]", "", newpath))
-        cat("Query:\n ", 
-            paste(names(q), unlist(q), sep = "=", collapse = "\n  "), "\n")
-        last_query(q$term)
-      }
-      path(route)
+      q <- parseQueryString(gsub(".*[?]", "", path))
+      cat("Query:\n ", 
+          paste(names(q), unlist(q), sep = "=", collapse = "\n  "), "\n")
+      
+      # Update reactive values (bad style?)
+      if ("term" %in% names(q)) last_query(q$term)
+      if ("page" %in% names(q)) search_options$page <- q$page
     }
+    
+    return(route)
   })
   
   # --Server routed page--
-  output$body <- renderUI({
-    shiny::validate(
-      need(usr_profile(), "Please sign in" )
-    )
+  output$inner <- renderUI({
     
-    route <- path()
-
-    switch(route,
+    switch(route(),
            "/" = uiIndex,
            "/cart" = uiCart(),
            "/account-orders" = uiAccountOrders(),
            "/account-profile" = uiAccountProfile(),
            "/account-wishlist" = uiAccountWishlist(),
-           "/search" = uiSearchResults(search_res$data, 
-                                       search_res$grid,
-                                       search_res$filters),
+           "/search" = uiSearchResults(paginated_res(), 
+                                       last_query(), search_options, 
+                                       grid_view()),
            "/login" = uiLogin(),
-           ""
-    )
+           "")
   })
   
   
@@ -187,32 +181,31 @@ server <- function(input, output, session) {
   
   # --Search result set--
   last_query <- reactiveVal(NULL)
-  search_res <- reactiveValues(data = NULL, grid = T, filters = NULL)
+  grid_view <- reactiveVal(TRUE)
+  search_options <- reactiveValues(
+    page = 1,
+    page_size = 12
+  )
+  
   
   # --Do Search--
-  observe({
-    validate(
-      need(last_query(), "Nothing to search for..." )
-    )
+  search_res <- reactive({
+    
+    validate(need(last_query(), "Nothing to search for..." ))
     isolate({
-      search_res$data <- last_query() %>% 
-        SearchWrapper(search_df = items_df,
-                      join_df = auctions_df,
-                      # favs_df = favorites$data,
-                      favs_df = NULL
-        )
+      result <- SearchWrapper(last_query(), 
+                              search_df = items_df,
+                              join_df = auctions_df,
+                              # favs_df = favorites$data,
+                              favs_df = NULL)
       
       # Go to list or grid view depending on result
-      if (nrow(search_res$data) >= kMaxPins) {
-        
-      } else {
-        
-      }
+      grid_view(!(nrow(result) >= kMaxPins))
+      return(result)
     })
   })
   
-  
-  
+  paginated_res <- reactive({search_res()})
 }
 
 
