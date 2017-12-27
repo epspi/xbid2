@@ -7,20 +7,20 @@ $('document').ready(function() {
       }, 0);
     }
   };
-  
+
   // define the routing table.
   var routes = {
     %s
   };
-  
+
   // instantiate the router.
   var router = Router(routes);
   router.init('/');
 
   $('#searchText').keypress(function (e) {
       if (e.which == 13) {
-        setTimeout(function () { 
-          Shiny.onInputChange('searchSubmit', Math.random()); 
+        setTimeout(function () {
+          Shiny.onInputChange('searchSubmit', Math.random());
           $('.close-search, .clear-search').click();
         }, 0);
         var term = $('#searchText').val();

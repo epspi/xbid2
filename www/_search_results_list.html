@@ -1,0 +1,54 @@
+<!-- Page Title-->
+<div class="page-title">
+  <div class="container">
+    <div class="column">
+      <h1>Shop List No Sidebar</h1>
+    </div>
+    <div class="column">
+      <ul class="breadcrumbs">
+        <li><a href="index.html">Home</a>
+        </li>
+        <li class="separator">&nbsp;</li>
+        <li>Shop List No Sidebar</li>
+      </ul>
+    </div>
+  </div>
+</div>
+<!-- Page Content-->
+<div class="container padding-bottom-3x mb-1">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <!-- Shop Toolbar-->
+      <div class="shop-toolbar padding-bottom-1x mb-2">
+        <div class="column">
+          <div class="shop-sorting">
+            <label for="sorting">Sort by:</label>
+            <select class="form-control" id="sorting">
+              <option>Popularity</option>
+              <option>Low - High Price</option>
+              <option>High - Low Price</option>
+              <option>Avarage Rating</option>
+              <option>A - Z Order</option>
+              <option>Z - A Order</option>
+            </select><span class="text-muted">Showing:&nbsp;</span><span>1 - {{n_items}} items</span>
+          </div>
+        </div>
+        <div class="column">
+          <div class="shop-view"><a class="grid-view" href="shop-grid-ns.html"><span></span><span></span><span></span></a><a class="list-view active" href="shop-list-ns.html"><span></span><span></span><span></span></a></div>
+        </div>
+      </div>
+      {{products}}
+      <div class="pt-2">
+        <!-- Pagination-->
+        <nav class="pagination">
+          <div class="column">
+              <ul class="pages">
+                  {{pagination}}
+              </ul>
+          </div>
+          <div class="column text-right hidden-xs-down"><a class="btn btn-outline-secondary btn-sm" href="#">Next&nbsp;<i class="icon-arrow-right"></i></a></div>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>

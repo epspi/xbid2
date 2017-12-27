@@ -26,9 +26,6 @@
     <!-- Shiny-->
     {{ headContent() }}
     {{ useShinyjs() }}
-    <!-- Director router -->
-    <script src="https://rawgit.com/flatiron/director/master/build/director.min.js"></script>
-
   </head>
   <!-- Body-->
   <body>
@@ -106,7 +103,7 @@
       </nav>
     </div>
     <!-- Off-Canvas Mobile Menu-->
-    <div class="offcanvas-container" id="mobile-menu"><a class="account-link" href="account-orders.html">
+    <div class="offcanvas-container" id="mobile-menu"><a class="account-link" href="#/account-orders">
         <div class="user-ava"><img src="" alt="">
         </div>
         <div class="user-info">
@@ -202,80 +199,6 @@
               </li>
             </ul>
           </li>
-          <li class="has-children"><span><a href="account-orders.html"><span>Account</span></a><span class="sub-menu-toggle"></span></span>
-            <ul class="offcanvas-submenu">
-                <li><a href="account-login.html">Login / Register</a></li>
-                <li><a href="account-password-recovery.html">Password Recovery</a></li>
-                <li><a href="account-orders.html">Orders List</a></li>
-                <li><a href="account-wishlist.html">Wishlist</a></li>
-                <li><a href="account-profile.html">Profile Page</a></li>
-                <li><a href="account-address.html">Contact / Shipping Address</a></li>
-                <li><a href="account-open-ticket.html">Open Ticket</a></li>
-                <li><a href="account-tickets.html">My Tickets</a></li>
-            </ul>
-          </li>
-          <li class="has-children"><span><a href="blog-rs.html"><span>Blog</span></a><span class="sub-menu-toggle"></span></span>
-            <ul class="offcanvas-submenu">
-              <li class="has-children"><span><a href="blog-rs.html"><span>Blog Layout</span></a><span class="sub-menu-toggle"></span></span>
-                <ul class="offcanvas-submenu">
-                    <li><a href="blog-rs.html">Blog Right Sidebar</a></li>
-                    <li><a href="blog-ls.html">Blog Left Sidebar</a></li>
-                    <li><a href="blog-ns.html">Blog No Sidebar</a></li>
-                </ul>
-              </li>
-              <li class="has-children"><span><a href="blog-single-rs.html"><span>Single Post Layout</span></a><span class="sub-menu-toggle"></span></span>
-                <ul class="offcanvas-submenu">
-                    <li><a href="blog-single-rs.html">Post Right Sidebar</a></li>
-                    <li><a href="blog-single-ls.html">Post Left Sidebar</a></li>
-                    <li><a href="blog-single-ns.html">Post No Sidebar</a></li>
-                </ul>
-              </li>
-            </ul>
-          </li>
-          <li class="has-children"><span><a href="#/"><span>Pages</span></a><span class="sub-menu-toggle"></span></span>
-            <ul class="offcanvas-submenu">
-                <li><a href="about.html">About Us</a></li>
-                <li><a href="mobile-app.html">Unishop Mobile App</a></li>
-                <li><a href="services.html">Services</a></li>
-                <li><a href="contacts.html">Contacts</a></li>
-                <li><a href="faq.html">Help / FAQ</a></li>
-                <li><a href="order-tracking.html">Order Tracking</a></li>
-                <li><a href="search-results.html">Search Results</a></li>
-                <li><a href="404.html">404</a></li>
-              <li><a class="text-danger" href="docs/dev-setup.html">Documentation</a></li>
-            </ul>
-          </li>
-          <li class="has-children"><span><a href="components/accordion.html"><span>Components</span></a><span class="sub-menu-toggle"></span></span>
-            <ul class="offcanvas-submenu">
-                <li><a href="components/accordion.html">Accordion</a></li>
-                <li><a href="components/alerts.html">Alerts</a></li>
-                <li><a href="components/buttons.html">Buttons</a></li>
-                <li><a href="components/cards.html">Cards</a></li>
-                <li><a href="components/carousel.html">Carousel</a></li>
-                <li><a href="components/countdown.html">Countdown</a></li>
-                <li><a href="components/forms.html">Forms</a></li>
-                <li><a href="components/gallery.html">Gallery</a></li>
-                <li><a href="components/google-maps.html">Google Maps</a></li>
-                <li><a href="components/images.html">Images &amp; Figures</a></li>
-                <li><a href="components/list-group.html">List Group</a></li>
-                <li><a href="components/market-social-buttons.html">Market &amp; Social Buttons</a></li>
-                <li><a href="components/media.html">Media Object</a></li>
-                <li><a href="components/modal.html">Modal</a></li>
-                <li><a href="components/pagination.html">Pagination</a></li>
-                <li><a href="components/pills.html">Pills</a></li>
-                <li><a href="components/progress-bars.html">Progress Bars</a></li>
-                <li><a href="components/shop-items.html">Shop Items</a></li>
-                <li><a href="components/steps.html">Steps</a></li>
-                <li><a href="components/tables.html">Tables</a></li>
-                <li><a href="components/tabs.html">Tabs</a></li>
-                <li><a href="components/team.html">Team</a></li>
-                <li><a href="components/toasts.html">Toast Notifications</a></li>
-                <li><a href="components/tooltips-popovers.html">Tooltips &amp; Popovers</a></li>
-                <li><a href="components/typography.html">Typography</a></li>
-                <li><a href="components/video-player.html">Video Player</a></li>
-                <li><a href="components/widgets.html">Widgets</a></li>
-            </ul>
-          </li>
         </ul>
       </nav>
     </div>
@@ -283,9 +206,12 @@
     <!-- Remove "navbar-sticky" class to make navigation bar scrollable with the page.-->
     <header class="navbar navbar-sticky">
       <!-- Search-->
-      <form class="site-search" method="get">
-        <input type="text" name="site_search" placeholder="Type to search...">
-        <div class="search-tools"><span class="clear-search">Clear</span><span class="close-search"><i class="icon-cross"></i></span></div>
+      <form class="site-search">
+        <input id="searchText" type="text" name="site_search" placeholder="Type to search...">
+        <div class="search-tools">
+          <span class="clear-search">Clear</span>
+          <span class="close-search"><i class="icon-cross"></i></span>
+        </div>
       </form>
       <div class="site-branding">
         <div class="inner">
@@ -383,93 +309,6 @@
               </li>
             </ul>
           </li>
-          <li><a href="account-orders.html"><span>Account</span></a>
-            <ul class="sub-menu">
-                <li><a href="account-login.html">Login / Register</a></li>
-                <li><a href="account-password-recovery.html">Password Recovery</a></li>
-                <li><a href="account-orders.html">Orders List</a></li>
-                <li><a href="account-wishlist.html">Wishlist</a></li>
-                <li><a href="account-profile.html">Profile Page</a></li>
-                <li><a href="account-address.html">Contact / Shipping Address</a></li>
-                <li><a href="account-tickets.html">My Tickets</a></li>
-            </ul>
-          </li>
-          <li><a href="blog-rs.html"><span>Blog</span></a>
-            <ul class="sub-menu">
-              <li class="has-children"><a href="blog-rs.html"><span>Blog Layout</span></a>
-                <ul class="sub-menu">
-                    <li><a href="blog-rs.html">Blog Right Sidebar</a></li>
-                    <li><a href="blog-ls.html">Blog Left Sidebar</a></li>
-                    <li><a href="blog-ns.html">Blog No Sidebar</a></li>
-                </ul>
-              </li>
-              <li class="has-children"><a href="blog-single-rs.html"><span>Single Post Layout</span></a>
-                <ul class="sub-menu">
-                    <li><a href="blog-single-rs.html">Post Right Sidebar</a></li>
-                    <li><a href="blog-single-ls.html">Post Left Sidebar</a></li>
-                    <li><a href="blog-single-ns.html">Post No Sidebar</a></li>
-                </ul>
-              </li>
-            </ul>
-          </li>
-          <li><a href="#/"><span>Pages</span></a>
-            <ul class="sub-menu">
-                <li><a href="about.html">About Us</a></li>
-                <li><a href="contacts.html">Contacts</a></li>
-                <li><a href="faq.html">Help / FAQ</a></li>
-                <li><a href="order-tracking.html">Order Tracking</a></li>
-                <li><a href="search-results.html">Search Results</a></li>
-                <li><a href="404.html">404 Not Found</a></li>
-              <li><a class="text-danger" href="docs/dev-setup.html">Documentation</a></li>
-            </ul>
-          </li>
-          <li class="has-megamenu"><a href="components/accordion.html"><span>Components</span></a>
-            <ul class="mega-menu">
-              <li><span class="mega-menu-title">A - F</span>
-                  <ul class="sub-menu">
-                    <li><a href="components/accordion.html">Accordion</a></li>
-                    <li><a href="components/alerts.html">Alerts</a></li>
-                    <li><a href="components/buttons.html">Buttons</a></li>
-                    <li><a href="components/cards.html">Cards</a></li>
-                    <li><a href="components/carousel.html">Carousel</a></li>
-                    <li><a href="components/countdown.html">Countdown</a></li>
-                    <li><a href="components/forms.html">Forms</a></li>
-                  </ul>
-              </li>
-              <li><span class="mega-menu-title">G - M</span>
-                  <ul class="sub-menu">
-                    <li><a href="components/gallery.html">Gallery</a></li>
-                    <li><a href="components/google-maps.html">Google Maps</a></li>
-                    <li><a href="components/images.html">Images &amp; Figures</a></li>
-                    <li><a href="components/list-group.html">List Group</a></li>
-                    <li><a href="components/market-social-buttons.html">Market &amp; Social Buttons</a></li>
-                    <li><a href="components/media.html">Media Object</a></li>
-                    <li><a href="components/modal.html">Modal</a></li>
-                  </ul>
-              </li>
-              <li><span class="mega-menu-title">P - T</span>
-                  <ul class="sub-menu">
-                    <li><a href="components/pagination.html">Pagination</a></li>
-                    <li><a href="components/pills.html">Pills</a></li>
-                    <li><a href="components/progress-bars.html">Progress Bars</a></li>
-                    <li><a href="components/shop-items.html">Shop Items</a></li>
-                    <li><a href="components/steps.html">Steps</a></li>
-                    <li><a href="components/tables.html">Tables</a></li>
-                    <li><a href="components/tabs.html">Tabs</a></li>
-                  </ul>
-              </li>
-              <li><span class="mega-menu-title">T - W</span>
-                  <ul class="sub-menu">
-                    <li><a href="components/team.html">Team</a></li>
-                    <li><a href="components/toasts.html">Toast Notifications</a></li>
-                    <li><a href="components/tooltips-popovers.html">Tooltips &amp; Popovers</a></li>
-                    <li><a href="components/typography.html">Typography</a></li>
-                    <li><a href="components/video-player.html">Video Player</a></li>
-                    <li><a href="components/widgets.html">Widgets</a></li>
-                  </ul>
-              </li>
-            </ul>
-          </li>
         </ul>
       </nav>
       <!-- Toolbar-->
@@ -477,7 +316,7 @@
         <div class="inner">
           <div class="tools">
             <div class="search"><i class="icon-search"></i></div>
-            <div class="account"><a href="account-orders.html"></a><i class="icon-head"></i>
+            <div class="account"><a href="#/account-orders"></a><i class="icon-head"></i>
               <ul class="toolbar-dropdown">
                 <li class="sub-menu-user">
                   <div class="user-ava"><img src="" alt="">
@@ -487,9 +326,9 @@
                     <span class="text-xs text-muted">290 Reward points</span>
                   </div>
                 </li>
-                  <li><a href="account-profile.html">My Profile</a></li>
-                  <li><a href="account-orders.html">Orders List</a></li>
-                  <li><a href="account-wishlist.html">Wishlist</a></li>
+                  <li><a href="#account-profile">My Profile</a></li>
+                  <li><a href="#/account-orders">Orders List</a></li>
+                  <li><a href="#account-wishlist">Wishlist</a></li>
                 <li class="sub-menu-separator"></li>
                 <li><a id="btn-logout" href="#/"> <i class="icon-unlock"></i>Logout</a></li>
               </ul>
@@ -526,13 +365,14 @@
     <!-- Back To Top Button--><a class="scroll-to-top-btn" href="#/"><i class="icon-arrow-up"></i></a>
     <!-- Backdrop-->
     <div class="site-backdrop"></div>
+
     <!-- JavaScript (jQuery) libraries, plugins and custom scripts-->
     <script src="js/vendor.min.js"></script>
-    <script src="js/scripts.min.js"></script>
+    <script src="js/scripts.js"></script>
+    <script src="js/app.js"></script>
     <!-- Auth0 supporting functions -->
     <script src="js/auth0.min.js"></script>
     <script src="js/auth0-variables.js"></script>
     <script src="js/auth0_func.js"></script>
-    <!-- <script src="js/router.js"></script> -->
   </body>
 </html>
