@@ -201,6 +201,7 @@ server <- function(input, output, session) {
       
       # Go to list or grid view depending on result
       grid_view(!(nrow(result) >= kMaxPins))
+      View(result)
       return(result)
     })
   })
