@@ -52,7 +52,7 @@ kLocalLocations <- c("Cincinnati", "Sharonville", "West Chester",
                      "Maineville", "Milford", "Fairfield", "Batavia", "Newport",
                      "Dayton", "Covington")
 description_end_regex <- "((Item )?Location:|Front Page:|Contact:|Facebook:|Pinterest:|Twitter:).*"
-section_names <- "(Serial #|Lotted By|Load #|Brand|Item Description|MSRP|Model|Specifications|Width|Depth|Height|Weight|Item Link Calc|Additional Information) ?:"
+section_names <- "(Serial #|Lotted By|Load #|(Item )?Brand|(Item )?Desc(ription)?|MSRP|Model|Specifications|Width|Depth|Height|Weight|Item Link Calc|Additional Info(rmation)?) ?:"
 keepa_base <- "http://camelcamelcamel.com/search?sq="
 camel_base <- "http://camelcamelcamel.com/search?sq="
 amazon_base <- "http://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords="
@@ -342,16 +342,17 @@ FlattenFeatures <- function(list) {
   sapply(list, function(item) jsonlite::toJSON(item, auto_unbox = TRUE) %>% as.character)
 }
 GetFeature <- function(list_items,
-                       feature_name) {
+                       feature_regex) {
   # Takes a named feature from a list produced by GrokFeatures
   sapply(list_items, function(list) {
-    value <- list[[feature_name]]
+    name <- grep(feature_regex, names(list), ignore.case = T, value = T)[1]
+    value <- list[[name]]
     ifelse(is.null(value), NA, value)
   }) %>% CleanStr
 }
 GetMSRP <- function(list_items) {
   options(warn = -1)
-  MSRP <- list_items %>% GetFeature("MSRP") %>% gsub('[$]',"",.) %>% as.numeric
+  MSRP <- as.numeric(gsub('[$]',"", GetFeature(list_items, "MSRP")))
   options(warn = 0)
   return(MSRP)
 }
@@ -946,10 +947,12 @@ ScrapeItemlist <- function(lnk,
            Features = GrokFeatures(Description)
     ) %>%
     # Extract specific features from grokked Features
-    mutate(Brand = GetFeature(Features, "Brand"),
-           Model = GetFeature(Features, "Model"),
-           MSRP = GetMSRP(Features),
-           Condition = GetFeature(Features, "Additional Information")
+    mutate(
+      Brand = GetFeature(Features, "Brand"),
+      Model = GetFeature(Features, "Model"),
+      MSRP = GetMSRP(Features),
+      Condition = GetFeature(Features, "Additional Info|Condition"),
+      Desc = GetFeature(Features, "Desc")
     )
   
   ####
