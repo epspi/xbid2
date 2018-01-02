@@ -373,18 +373,29 @@ ExtractSection <- function(description,
 GenTitle <- function(brand,
                      model,
                      description,
-                     max_words=8) {
-  Map(function(b, m, d) {
-    if(is.na(m)) {
-      strsplit(d, " ") %>%
-        sapply(function(x) {
-          paste0(x[1:min(length(x), max_words)], collapse = " ")
-        })
-    } else {
-      paste(b, m)
-    }
-  }, brand, model, description) %>%
-    as.character
+                     max_words=6) {
+    Map(function(b, m, d) {
+        res <- strsplit(d, " ") %>%
+            sapply(function(x) {
+                paste0(x[1:min(length(x), max_words)], collapse = " ")
+            })
+        
+        clean_b <- ifelse(is.na(b), "", b)
+        clean_m <- ifelse(is.na(m), "", m)
+        if(!is.na(m)) {
+            res <- res %>% 
+                # gsub(m, "", .) %>% 
+                paste(m, .)
+        }
+        if(!is.na(b)) {
+            res <- res %>% 
+                gsub(b, "", .) %>%
+                paste(b, .)
+        }
+        
+    }, brand, model, description) %>%
+        as.character %>% 
+        CleanStr()
 }
 DoSearch <- function(search_string,
                      df,
