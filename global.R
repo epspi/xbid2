@@ -667,46 +667,71 @@ GenRangeSlider <- function(template_str, res) {
   template_str %>% 
     HTML
 }
+GenCheckbox <- function(id, label, value, val_label, val_parens) {
+    
+    html_str <- 
+        '<label class="custom-control custom-checkbox d-block">
+    <input class="custom-control-input" type="checkbox" name="%s" value="%s">
+    <span class="custom-control-indicator"></span>
+    <span class="custom-control-description">%s&nbsp;
+    <span class="text-muted">(%s)</span>
+    </span>
+    </label>'
+    
+    wrapper <- 
+        '<!-- Widget %s Filter-->
+    <section class="widget option-set" data-group="%s">
+    <h3 class="widget-title">%s</h3>%s
+    </section>'
+    
+    sprintf(html_str, id, value, val_label, val_parens) %>% 
+        paste0(collapse = "") %>% 
+        sprintf(wrapper, label, label, label, .) %>% 
+        HTML
+}
 GenLocationsFilter <- function(res) {
   
   loc <- count(res, location, sort = T) %>% 
     mutate(pretty_loc = gsub("(^[0-9]* )|(,.*$)", "", location))
   
   input_id <- "filter_loc"
-  loc_item <- 
-  '<label class="custom-control custom-checkbox d-block">
-    <input class="custom-control-input" type="checkbox" name="%s" value="%s">
-    <span class="custom-control-indicator"></span>
-    <span class="custom-control-description">%s&nbsp;
-      <span class="text-muted">(%s)</span>
-    </span>
-  </label>'
+  label <- "Locations"
   
-  loc_wrapper <- 
-  '<!-- Widget Location Filter-->
-  <section class="widget option-set" data-group="location">
-    <h3 class="widget-title">Locations</h3>%s
-  </section>'
-  
-  checkbox <- sprintf(loc_item,
-                      input_id,
-                      loc$location,
-                      loc$pretty_loc,
-                      loc$n) %>%
-    paste0(collapse="") %>%
-    sprintf(loc_wrapper, .) %>% 
-    HTML
-
+  with(loc, GenCheckbox(input_id, label, location, pretty_loc, n))
+      
+}
+GenConditionsFilter <- function(res) {
+    
+    dat <- count(res, Condition, sort = T) 
+    print(dat)
+    
+    input_id <- "filter_condition"
+    label <- "Conditions"
+    
+    with(dat, GenCheckbox(input_id, label, Condition, Condition, n))
 }
 GenFilters <- function(slider_template, res) {
   
-  print(count(res, Condition))
-  
   locations <- GenLocationsFilter(res)
+  conditions <- GenConditionsFilter(res)
   slider <- GenRangeSlider(slider_template, res)
-  list(locations, slider)
+  list(locations, conditions, slider)
+}
+GetPhotoAreaSRCs <- function(html_obj) {
+    html_obj %>% 
+        html_nodes('#PhotoArea img') %>% 
+        html_attr("src") %>% 
+        grep("[.]\\w+$", ., ignore.case = T, value = T)
+    
 }
 
+GetCurrentPrice <- function(html_obj) {
+    html_obj %>% 
+        html_nodes(".DataRow td") %>% 
+        .[6] %>% 
+        html_text %>% 
+        as.numeric
+}
 
 ## ///////////////////////////////////////////// ##
 ## SCRAPING FUNCTIONS -----------------------------

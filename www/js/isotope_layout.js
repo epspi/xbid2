@@ -27,13 +27,13 @@ if ($(".isotope-grid").length) {
   // Respond to sort dropdown
   var $sort_select = $("#sorting");
   $sort_select.change(function () {
-    var asc = true
+    var asc = true;
     var sort_value = $(this).find(":selected").attr("data-sort-value");
     if (sort_value == "price_low_high") {
       sort_value = "price";
     } else if (sort_value == "price_high_low") {
       sort_value = "price";
-      asc = false
+      asc = false;
     }
 
     $grid.isotope({
@@ -49,12 +49,12 @@ if ($(".isotope-grid").length) {
     manageCheckbox($checkbox);
     $grid.isotope({
       filter: function () {
-        // Filter Location
-        if (filters["location"].length > 0) {
+        // Filter Locations
+        if (filters.Locations.length > 0) {
           var loc = $(this).find('.product-card').attr('data-location');
-          return jQuery.inArray(loc, filters["location"]) > -1;
+          return jQuery.inArray(loc, filters.Locations) > -1;
         } else {
-          return true
+          return true;
         }
 
         // Filter Condition
