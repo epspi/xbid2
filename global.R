@@ -351,98 +351,98 @@ GetFeature <- function(list_items,
   }) %>% CleanStr
 }
 GetMSRP <- function(list_items) {
-    options(warn = -1)
-    MSRP <- as.numeric(gsub('[$]',"", GetFeature(list_items, "MSRP")))
-    options(warn = 0)
-    return(MSRP)
+  options(warn = -1)
+  MSRP <- as.numeric(gsub('[$]',"", GetFeature(list_items, "MSRP")))
+  options(warn = 0)
+  return(MSRP)
 }
 GetPrimaryCondition <- function(str) {
-    
-    func <- function(x) {
-        if (grepl("NEW", x)) return("Appears New")
-        else if (grepl("OPEN.?BOX", x)) return("Open Box")
-        else return("Other")
-    }
-    
-    setNames(sapply(str, func), NULL)
+  
+  func <- function(x) {
+    if (grepl("NEW", x)) return("Appears New")
+    else if (grepl("OPEN.?BOX", x)) return("Open Box")
+    else return("Other")
+  }
+  
+  setNames(sapply(str, func), NULL)
 }
 HasConditionModifier <- function(condition,
                                  mod_str) {
-    grepl(mod_str, condition)
+  grepl(mod_str, condition)
 }
 MutateConditions <- function(x) {
-    
-    regex_damaged <- "(DAMAGE)|(BROKE)|(CRACK)|(CHIP)|(SQUEEZ)|(SCRATCH)|(DENT)|(BENT)|(RIP)|(HOLE)|(SHATTER)|(IMPERFECTION)|(TEAR)|(TORN)"
-    regex_incomplete <- "(INCOMPLETE)|(MAY.*NOT)|(DO.*NOT)|(NOT.*COMPLETE)|(NOT.*INCLUDE)|(MISSING)|(ONLY)|(BOX.*[1-9]+.*OF)"
-    
-    x <- gsub("[[:punct:]]","", CleanStr(toupper(x)))
-    case_when(
-        HasConditionModifier(x, regex_damaged) ~ "Damaged",
-        HasConditionModifier(x, regex_incomplete) ~ "Incomplete",
-        TRUE ~ GetPrimaryCondition(x)
-    )
+  
+  regex_damaged <- "(DAMAGE)|(BROKE)|(CRACK)|(CHIP)|(SQUEEZ)|(SCRATCH)|(DENT)|(BENT)|(RIP)|(HOLE)|(SHATTER)|(IMPERFECTION)|(TEAR)|(TORN)"
+  regex_incomplete <- "(INCOMPLETE)|(MAY.*NOT)|(DO.*NOT)|(NOT.*COMPLETE)|(NOT.*INCLUDE)|(MISSING)|(ONLY)|(BOX.*[1-9]+.*OF)"
+  
+  x <- gsub("[[:punct:]]","", CleanStr(toupper(x)))
+  case_when(
+    HasConditionModifier(x, regex_damaged) ~ "Damaged",
+    HasConditionModifier(x, regex_incomplete) ~ "Incomplete",
+    TRUE ~ GetPrimaryCondition(x)
+  )
 }
 CleanStr <- function(str) {
-    str %>%
+  str %>%
     gsub("[\t\n\r\v\f]", " ", .) %>%
     gsub("  +"," ",.) %>%
     gsub("^\\s+|\\s+$", "", .)
 }
 GetAmazonPrice <- function(title) {
-    url <- GenAmazonUrl(url_escape(title)) 
-    # cat(" using url:\n ", url, "\n")
+  url <- GenAmazonUrl(url_escape(title)) 
+  # cat(" using url:\n ", url, "\n")
+  
+  res <- GET(url, 
+             add_headers("User-agent" = sample(ua_strings, 1))
+  ) %>% 
+    content
+  
+  no_res <- res %>% html_nodes("#noResultsTitle") %>% 
+    length %>% `>`(0)
+  
+  if (!no_res) {
+    res2 <- res %>% 
+      html_node(".s-result-list")
     
-    res <- GET(url, 
-               add_headers("User-agent" = sample(ua_strings, 1))
-               ) %>% 
-        content
-    
-    no_res <- res %>% html_nodes("#noResultsTitle") %>% 
-        length %>% `>`(0)
-    
-    if (!no_res) {
-        res2 <- res %>% 
-            html_node(".s-result-list")
-        
-        if (class(res2) == "xml_missing") {
-            return(list(Price = NA, Category = NA))
-        } else {
-            if (class(res2) == "xml_missing") {
-                return(list(Price = NA, Category = NA))
-            } else {
-                res2 <- res2 %>%
-                    html_node(".s-item-container")
-            }
-        }
-        
-        if (class(res2) == "xml_missing") {
-            return(list(Price = NA, Category = NA))
-        } else {
-            
-            price <- res2 %>% 
-                html_node(".sx-price-whole") %>%
-                html_text
-            
-            if (is.na(price)) {
-                price <- res2 %>% 
-                    html_node(".a-size-base.a-color-base") %>%
-                    html_text
-            }
-            price <- price %>% gsub('[$]',"",.) %>% 
-                gsub(",", "", .) %>% 
-                CleanStr() %>% 
-                as.numeric
-        }
-        
-        cat <- res %>% 
-            html_node(".categoryRefinementsSection") %>% 
-            html_node(".boldRefinementLink") %>% 
-            html_text
-        
-        list(Price = price, Category = cat)
+    if (class(res2) == "xml_missing") {
+      return(list(Price = NA, Category = NA))
     } else {
-        list(Price = NA, Category = NA)
+      if (class(res2) == "xml_missing") {
+        return(list(Price = NA, Category = NA))
+      } else {
+        res2 <- res2 %>%
+          html_node(".s-item-container")
+      }
     }
+    
+    if (class(res2) == "xml_missing") {
+      return(list(Price = NA, Category = NA))
+    } else {
+      
+      price <- res2 %>% 
+        html_node(".sx-price-whole") %>%
+        html_text
+      
+      if (is.na(price)) {
+        price <- res2 %>% 
+          html_node(".a-size-base.a-color-base") %>%
+          html_text
+      }
+      price <- price %>% gsub('[$]',"",.) %>% 
+        gsub(",", "", .) %>% 
+        CleanStr() %>% 
+        as.numeric
+    }
+    
+    cat <- res %>% 
+      html_node(".categoryRefinementsSection") %>% 
+      html_node(".boldRefinementLink") %>% 
+      html_text
+    
+    list(Price = price, Category = cat)
+  } else {
+    list(Price = NA, Category = NA)
+  }
 }
 ExtractSection <- function(description,
                            section) {
@@ -456,28 +456,28 @@ GenTitle <- function(brand,
                      model,
                      description,
                      max_words=6) {
-    Map(function(b, m, d) {
-        res <- strsplit(d, " ") %>%
-            sapply(function(x) {
-                paste0(x[1:min(length(x), max_words)], collapse = " ")
-            })
-        
-        clean_b <- ifelse(is.na(b), "", b)
-        clean_m <- ifelse(is.na(m), "", m)
-        if(!is.na(m)) {
-            res <- res %>% 
-                # gsub(m, "", .) %>% 
-                paste(m, .)
-        }
-        if(!is.na(b)) {
-            res <- res %>% 
-                gsub(b, "", .) %>%
-                paste(b, .)
-        }
-        
-    }, brand, model, description) %>%
-        as.character %>% 
-        CleanStr()
+  Map(function(b, m, d) {
+    res <- strsplit(d, " ") %>%
+      sapply(function(x) {
+        paste0(x[1:min(length(x), max_words)], collapse = " ")
+      })
+    
+    clean_b <- ifelse(is.na(b), "", b)
+    clean_m <- ifelse(is.na(m), "", m)
+    if(!is.na(m)) {
+      res <- res %>% 
+        # gsub(m, "", .) %>% 
+        paste(m, .)
+    }
+    if(!is.na(b)) {
+      res <- res %>% 
+        gsub(b, "", .) %>%
+        paste(b, .)
+    }
+    
+  }, brand, model, description) %>%
+    as.character %>% 
+    CleanStr()
 }
 DoSearch <- function(search_string,
                      df,
@@ -718,20 +718,15 @@ dropdownFavsMenu <- function(...,
 GenProductsGrid <- function(product_str, res) {
   
   layout_str <- 
-  '<!-- Products Grid-->
+    '<!-- Products Grid-->
   <div class="isotope-grid cols-3 mb-2">
     <div class="gutter-sizer"></div>
     <div class="grid-sizer"></div>
     %s
   </div>'
   
-  sprintf(product_str,
-          res$location,
-          res$link.item,
-          res$img_src,
-          res$link.item,
-          res$Item,
-          res$MSRP) %>% 
+  with(res, sprintf(product_str, location, Condition, 
+                    link.item, img_src, link.item, Item, MSRP)) %>% 
     paste0(collapse="") %>% 
     sprintf(layout_str, .) %>%
     HTML
@@ -757,30 +752,33 @@ GenPagination <- function(sorted_res, page, page_size = 12) {
     HTML
 }
 GenRangeSlider <- function(template_str, res) {
-  template_str %>% 
-    HTML
+  # template_str %>% 
+  #   HTML
+  
+  
+  
 }
 GenCheckbox <- function(id, label, value, val_label, val_parens) {
-    
-    html_str <- 
-        '<label class="custom-control custom-checkbox d-block">
+  
+  html_str <- 
+    '<label class="custom-control custom-checkbox d-block">
     <input class="custom-control-input" type="checkbox" name="%s" value="%s">
     <span class="custom-control-indicator"></span>
     <span class="custom-control-description">%s&nbsp;
     <span class="text-muted">(%s)</span>
     </span>
     </label>'
-    
-    wrapper <- 
-        '<!-- Widget %s Filter-->
+  
+  wrapper <- 
+    '<!-- Widget %s Filter-->
     <section class="widget option-set" data-group="%s">
     <h3 class="widget-title">%s</h3>%s
     </section>'
-    
-    sprintf(html_str, id, value, val_label, val_parens) %>% 
-        paste0(collapse = "") %>% 
-        sprintf(wrapper, label, label, label, .) %>% 
-        HTML
+  
+  sprintf(html_str, id, value, val_label, val_parens) %>% 
+    paste0(collapse = "") %>% 
+    sprintf(wrapper, label, label, label, .) %>% 
+    HTML
 }
 GenLocationsFilter <- function(res) {
   
@@ -791,17 +789,18 @@ GenLocationsFilter <- function(res) {
   label <- "Locations"
   
   with(loc, GenCheckbox(input_id, label, location, pretty_loc, n))
-      
+  
 }
 GenConditionsFilter <- function(res) {
-    
-    dat <- mutate(res, Condition = MutateConditions(Condition)) %>% 
-        count(Condition, sort = T) 
-    
-    input_id <- "filter_condition"
-    label <- "Conditions"
-    
-    with(dat, GenCheckbox(input_id, label, Condition, Condition, n))
+  
+  dat <- count(res, Condition, sort = T) 
+  print(dat)
+  # View(select(res, Desc, Condition))
+  
+  input_id <- "filter_condition"
+  label <- "Conditions"
+  
+  with(dat, GenCheckbox(input_id, label, Condition, Condition, n))
 }
 GenFilters <- function(slider_template, res) {
   
@@ -811,19 +810,19 @@ GenFilters <- function(slider_template, res) {
   list(locations, conditions, slider)
 }
 GetPhotoAreaSRCs <- function(html_obj) {
-    html_obj %>% 
-        html_nodes('#PhotoArea img') %>% 
-        html_attr("src") %>% 
-        grep("[.]\\w+$", ., ignore.case = T, value = T)
-    
+  html_obj %>% 
+    html_nodes('#PhotoArea img') %>% 
+    html_attr("src") %>% 
+    grep("[.]\\w+$", ., ignore.case = T, value = T)
+  
 }
 
 GetCurrentPrice <- function(html_obj) {
-    html_obj %>% 
-        html_nodes(".DataRow td") %>% 
-        .[6] %>% 
-        html_text %>% 
-        as.numeric
+  html_obj %>% 
+    html_nodes(".DataRow td") %>% 
+    .[6] %>% 
+    html_text %>% 
+    as.numeric
 }
 
 ## ///////////////////////////////////////////// ##
