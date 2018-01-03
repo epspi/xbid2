@@ -351,16 +351,98 @@ GetFeature <- function(list_items,
   }) %>% CleanStr
 }
 GetMSRP <- function(list_items) {
-  options(warn = -1)
-  MSRP <- as.numeric(gsub('[$]',"", GetFeature(list_items, "MSRP")))
-  options(warn = 0)
-  return(MSRP)
+    options(warn = -1)
+    MSRP <- as.numeric(gsub('[$]',"", GetFeature(list_items, "MSRP")))
+    options(warn = 0)
+    return(MSRP)
+}
+GetPrimaryCondition <- function(str) {
+    
+    func <- function(x) {
+        if (grepl("NEW", x)) return("Appears New")
+        else if (grepl("OPEN.?BOX", x)) return("Open Box")
+        else return("Other")
+    }
+    
+    setNames(sapply(str, func), NULL)
+}
+HasConditionModifier <- function(condition,
+                                 mod_str) {
+    grepl(mod_str, condition)
+}
+MutateConditions <- function(x) {
+    
+    regex_damaged <- "(DAMAGE)|(BROKE)|(CRACK)|(CHIP)|(SQUEEZ)|(SCRATCH)|(DENT)|(BENT)|(RIP)|(HOLE)|(SHATTER)|(IMPERFECTION)|(TEAR)|(TORN)"
+    regex_incomplete <- "(INCOMPLETE)|(MAY.*NOT)|(DO.*NOT)|(NOT.*COMPLETE)|(NOT.*INCLUDE)|(MISSING)|(ONLY)|(BOX.*[1-9]+.*OF)"
+    
+    x <- gsub("[[:punct:]]","", CleanStr(toupper(x)))
+    case_when(
+        HasConditionModifier(x, regex_damaged) ~ "Damaged",
+        HasConditionModifier(x, regex_incomplete) ~ "Incomplete",
+        TRUE ~ GetPrimaryCondition(x)
+    )
 }
 CleanStr <- function(str) {
-  str %>%
+    str %>%
     gsub("[\t\n\r\v\f]", " ", .) %>%
     gsub("  +"," ",.) %>%
     gsub("^\\s+|\\s+$", "", .)
+}
+GetAmazonPrice <- function(title) {
+    url <- GenAmazonUrl(url_escape(title)) 
+    # cat(" using url:\n ", url, "\n")
+    
+    res <- GET(url, 
+               add_headers("User-agent" = sample(ua_strings, 1))
+               ) %>% 
+        content
+    
+    no_res <- res %>% html_nodes("#noResultsTitle") %>% 
+        length %>% `>`(0)
+    
+    if (!no_res) {
+        res2 <- res %>% 
+            html_node(".s-result-list")
+        
+        if (class(res2) == "xml_missing") {
+            return(list(Price = NA, Category = NA))
+        } else {
+            if (class(res2) == "xml_missing") {
+                return(list(Price = NA, Category = NA))
+            } else {
+                res2 <- res2 %>%
+                    html_node(".s-item-container")
+            }
+        }
+        
+        if (class(res2) == "xml_missing") {
+            return(list(Price = NA, Category = NA))
+        } else {
+            
+            price <- res2 %>% 
+                html_node(".sx-price-whole") %>%
+                html_text
+            
+            if (is.na(price)) {
+                price <- res2 %>% 
+                    html_node(".a-size-base.a-color-base") %>%
+                    html_text
+            }
+            price <- price %>% gsub('[$]',"",.) %>% 
+                gsub(",", "", .) %>% 
+                CleanStr() %>% 
+                as.numeric
+        }
+        
+        cat <- res %>% 
+            html_node(".categoryRefinementsSection") %>% 
+            html_node(".boldRefinementLink") %>% 
+            html_text
+        
+        list(Price = price, Category = cat)
+    } else {
+        list(Price = NA, Category = NA)
+    }
 }
 ExtractSection <- function(description,
                            section) {
@@ -713,8 +795,8 @@ GenLocationsFilter <- function(res) {
 }
 GenConditionsFilter <- function(res) {
     
-    dat <- count(res, Condition, sort = T) 
-    print(dat)
+    dat <- mutate(res, Condition = MutateConditions(Condition)) %>% 
+        count(Condition, sort = T) 
     
     input_id <- "filter_condition"
     label <- "Conditions"

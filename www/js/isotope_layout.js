@@ -47,10 +47,12 @@ if ($(".isotope-grid").length) {
   $('#filters').on('change', function (jQEvent) {
     var $checkbox = $(jQEvent.target);
     manageCheckbox($checkbox);
+    debugger;
     $grid.isotope({
       filter: function () {
         // Filter Locations
-        if (filters.Locations.length > 0) {
+        if (typeof filters.Conditions !== "undefined" && 
+            filters.Conditions.length > 0) {
           var loc = $(this).find('.product-card').attr('data-location');
           return jQuery.inArray(loc, filters.Locations) > -1;
         } else {
