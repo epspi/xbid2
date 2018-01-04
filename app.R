@@ -11,7 +11,6 @@ source("global.R")
 uiSearchResults <- enclose(function() {
   grid_product <- read_file("www/_grid_product_sprintf.html")
   grid_layout <- read_file("www/_grid_isotope.html")
-  list_template <- read_file("www/_list_product_sprintf.html")
   search_template2 <- read_file("www/_search_results2.html")
   range_slider_template <- read_file("www/_slider.html")
   
@@ -20,22 +19,14 @@ uiSearchResults <- enclose(function() {
     page <- opt$page
     page_size <- opt$page_size
     
-    template_func <- function(products) {
-      htmlTemplate(
+    htmlTemplate(
         text_ = search_template2, 
         search_term = query,
         n_items = nrow(search_res),
-        products =  products, 
+        products =  GenProductsGrid(grid_product, search_res), 
         pagination = GenPagination(search_res, page, page_size),
         filters = GenFilters(range_slider_template, search_res),
         document_ = F)
-    }
-    
-    if (grid) {
-      template_func(GenProductsGrid(grid_product, search_res))
-    } else {
-      template_func(GenProductsList(list_template, search_res))
-    }
   }
 })
 
@@ -60,7 +51,6 @@ routenames <- list(
   "/search",
   "/login"
 )
-
 
 
 # ============== UI ================
@@ -197,10 +187,10 @@ server <- function(input, output, session) {
                               search_df = items_df,
                               join_df = auctions_df,
                               # favs_df = favorites$data,
-                              favs_df = NULL)
+                              favs_df = NULL) %>% 
+          mutate(Condition = MutateConditions(Condition))
       
-      # Go to list or grid view depending on result
-      grid_view(!(nrow(result) >= kMaxPins))
+      # View(result)
       return(result)
     })
   })
