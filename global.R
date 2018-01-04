@@ -752,11 +752,8 @@ GenPagination <- function(sorted_res, page, page_size = 12) {
     HTML
 }
 GenRangeSlider <- function(template_str, res) {
-  # template_str %>% 
-  #   HTML
-  
-  
-  
+  price_max <- ceiling(max(res$MSRP, na.rm = T))
+  HTML(sprintf(template_str, 0, price_max, 0, price_max))
 }
 GenCheckbox <- function(id, label, value, val_label, val_parens) {
   

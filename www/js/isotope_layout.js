@@ -9,12 +9,7 @@ if ($(".isotope-grid").length) {
       getSortData: {
         time: ".product-title",
         price: function (itemElem) { // function
-          var price = $(itemElem).find('.product-price').text();
-          if (price === "NA") {
-            return 0;
-          } else {
-            return parseFloat(price);
-          }
+          return parsePrice($(itemElem).find('.product-price'));
         }
       },
       masonry: {
@@ -47,26 +42,52 @@ if ($(".isotope-grid").length) {
   $('#filters').on('change', function (jQEvent) {
     var $checkbox = $(jQEvent.target);
     manageCheckbox($checkbox);
-    $grid.isotope({
-      filter: function () {
-        
-        // Filter Locations
-        if (typeof filters.Locations !== "undefined" && 
-            filters.Locations.length > 0) {
-          var loc = $(this).find('.product-card').attr('data-location');
-          if (jQuery.inArray(loc, filters.Locations) < 0) return false;
-        // Filter Condition
-        } else if (typeof filters.Conditions !== "undefined" && 
-            filters.Conditions.length > 0) {
-          var cond = $(this).find('.product-card').attr('data-condition');
-          if (jQuery.inArray(cond, filters.Conditions) < 0) return false;
-        }
-        return true;
-      }
-    });
+    filterIsotope();
+  });
+  
+  // Respond to price range slider
+  var msrp_range = [];
+  rangeSlider.noUiSlider.on('change', function (values, handle) {
+    msrp_range = values.map(parseFloat);
+    filterIsotope();
   });
 }
-
+function filterIsotope() {
+  $grid.isotope({
+    filter: function () {
+      
+      // Filter Locations
+      if (typeof filters.Locations !== "undefined" && 
+          filters.Locations.length > 0) {
+        var loc = $(this).find('.product-card').attr('data-location');
+        if (jQuery.inArray(loc, filters.Locations) < 0) return false;
+      } 
+      
+      // Filter Condition
+      if (typeof filters.Conditions !== "undefined" && 
+          filters.Conditions.length > 0) {
+        var cond = $(this).find('.product-card').attr('data-condition');
+        if (jQuery.inArray(cond, filters.Conditions) < 0) return false;
+      }
+      // Filter MSRP range
+      if (msrp_range.length > 0) {
+        var msrp = parsePrice($(this).find('.product-price'));
+        if (msrp < msrp_range[0] || msrp > msrp_range[1]) return false;
+      }
+      
+      // Return true if nothing disqualifies the item
+      return true;
+    }
+  });
+}
+function parsePrice(elem) {
+  var price = elem.text().replace(/\$/g,'');
+  if (price === "NA") {
+    return 0;
+  } else {
+    return parseFloat(price);
+  }
+}
 function manageCheckbox($checkbox) {
   var checkbox = $checkbox[0];
 
