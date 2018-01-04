@@ -187,15 +187,17 @@ server <- function(input, output, session) {
                               search_df = items_df,
                               join_df = auctions_df,
                               # favs_df = favorites$data,
-                              favs_df = NULL) %>% 
-          mutate(Condition = MutateConditions(Condition))
+                              favs_df = NULL)
       
-      # View(result)
-      return(result)
+      if (nrow(result) > 0) mutate(res, Condition = MutateConditions(Condition))
+      else result
     })
   })
   
-  paginated_res <- reactive({search_res()})
+  paginated_res <- reactive({
+    validate(need(search_res(), "No items found"))
+    search_res()
+  })
 }
 
 

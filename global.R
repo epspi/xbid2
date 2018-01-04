@@ -108,6 +108,12 @@ versionHist <- readLines("VERSION")
 version <- regmatches(versionHist[1], regexpr("\\d+[.]\\d+",versionHist[1]))
 
 ## ///////////////////////////////////////////// ##
+## MATH FUNCTIONS----------------------------------
+## ///////////////////////////////////////////// ##
+NAto0 <- function(x) x[is.na(x)] <- 0
+INFto0 <- function(x) x[!is.finite(x)] <- 0
+
+## ///////////////////////////////////////////// ##
 ## IO FUNCTIONS------------------------------------
 ## ///////////////////////////////////////////// ##
 GetLastTimestamp <- function(timestamp_loc, time_file_format) {
@@ -323,7 +329,7 @@ ParseDescription <- function(description) {
   description %>%
     iconv(to = 'latin1', sub = ' ') %>%
     # enc2utf8 %>% 
-    gsub(description_end_regex, "", .) %>%
+    # gsub(description_end_regex, "", .) %>%
     gsub(section_names, "<<\\1:>>", .) %>%
     CleanStr
 }
@@ -744,7 +750,7 @@ GenProductsList <- function(template_str, res) {
 }
 GenPagination <- function(sorted_res, page, page_size = 12) {
   page <- as.integer(page)
-  pages <- 1:ceiling(nrow(sorted_res) / page_size)
+  pages <- 1:max(1, ceiling(nrow(sorted_res) / page_size))
   classes <- character(length(pages))
   classes[page] <- ' class = "active"'
   sprintf('<li%s><a href="#">%s</a></li>', classes, pages) %>% 
@@ -752,7 +758,7 @@ GenPagination <- function(sorted_res, page, page_size = 12) {
     HTML
 }
 GenRangeSlider <- function(template_str, res) {
-  price_max <- ceiling(max(res$MSRP, na.rm = T))
+  price_max <- ceiling(max(res$MSRP, 1, na.rm = T))
   HTML(sprintf(template_str, 0, price_max, 0, price_max))
 }
 GenCheckbox <- function(id, label, value, val_label, val_parens) {
@@ -1056,17 +1062,15 @@ ScrapeItemlist <- function(lnk,
     html_node("#DataTable") %>%
     html_table(header = T, fill = T) %>%
     mutate(Item = gsub("[.]","", Item),
-           Description = ParseDescription(Description),
+           Description2 = ParseDescription(Description),
+           Description = gsub(description_end_regex, "", Description2),
            link.item = paste0(root_link, Item),
-           Features = GrokFeatures(Description)
-    ) %>%
-    # Extract specific features from grokked Features
-    mutate(
-      Brand = GetFeature(Features, "Brand"),
-      Model = GetFeature(Features, "Model"),
-      MSRP = GetMSRP(Features),
-      Condition = GetFeature(Features, "Additional Info|Condition"),
-      Desc = GetFeature(Features, "Desc")
+           Features = GrokFeatures(Description),
+           Brand = GetFeature(Features, "Brand"),
+           Model = GetFeature(Features, "Model"),
+           MSRP = GetMSRP(Features),
+           Condition = GetFeature(Features, "Additional Info|Condition"),
+           Desc = GetFeature(Features, "Desc")
     )
   
   ####
