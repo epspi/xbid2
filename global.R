@@ -461,18 +461,17 @@ ExtractSection <- function(description,
 GenTitle <- function(brand,
                      model,
                      description,
-                     max_words=6) {
+                     max_words=7) {
   Map(function(b, m, d) {
-    res <- strsplit(d, " ") %>%
-      sapply(function(x) {
-        paste0(x[1:min(length(x), max_words)], collapse = " ")
-      })
     
-    clean_b <- ifelse(is.na(b), "", b)
-    clean_m <- ifelse(is.na(m), "", m)
+    max_words <- max_words - is.na(m) - is.na(b)
+    res <- strsplit(d, "[ ,]")[[1]] %>% 
+      .[1:min(length(.), max_words)] %>% 
+      paste0(collapse = " ")
+    
     if(!is.na(m)) {
       res <- res %>% 
-        # gsub(m, "", .) %>% 
+        gsub(m, "", .) %>%
         paste(m, .)
     }
     if(!is.na(b)) {
@@ -480,6 +479,7 @@ GenTitle <- function(brand,
         gsub(b, "", .) %>%
         paste(b, .)
     }
+    res
     
   }, brand, model, description) %>%
     as.character %>% 
@@ -731,8 +731,10 @@ GenProductsGrid <- function(product_str, res) {
     %s
   </div>'
   
-  with(res, sprintf(product_str, location, Condition, 
-                    link.item, img_src, link.item, Item, MSRP)) %>% 
+  res %>% 
+    mutate(Title = GenTitle(Brand, Model, Desc)) %>% 
+    with(sprintf(product_str, location, Condition, 
+                 link.item, img_src, link.item, Title, MSRP)) %>% 
     paste0(collapse="") %>% 
     sprintf(layout_str, .) %>%
     HTML
