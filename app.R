@@ -189,7 +189,7 @@ server <- function(input, output, session) {
                               # favs_df = favorites$data,
                               favs_df = NULL)
       
-      if (nrow(result) > 0) mutate(res, Condition = MutateConditions(Condition))
+      if (nrow(result) > 0) mutate(result, Condition = MutateConditions(Condition))
       else result
     })
   })
