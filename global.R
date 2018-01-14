@@ -1061,8 +1061,11 @@ ScrapeItemlist <- function(lnk,
   itemlist <- root_link %>%
     gsub("mnlist", "mnprint", .) %>%
     read_html(encoding = "ISO-8859-1") %>%
-    html_node("#DataTable") %>%
-    html_table(header = T, fill = T) %>%
+    html_node("#DataTable")
+  
+  emb_tables <- html_nodes(itemlist, "table")
+  if (length(emb_tables) > 0) return(NULL)
+  itemlist <- html_table(itemlist, header = T, fill = T) %>%
     mutate(Item = gsub("[.]","", Item),
            Description2 = ParseDescription(Description),
            Description = gsub(description_end_regex, "", Description2),
@@ -1080,16 +1083,15 @@ ScrapeItemlist <- function(lnk,
   itemlist$Features <- FlattenFeatures(itemlist$Features)
   ####
   
-  
   cat(" |","itemlist ok")
   #itemlist %>%  print
   
   n <- nrow(itemlist)
-  img_link <- try( itemlist$link.item %>% .[n] %>%
-                     read_html %>%
-                     html_node("#DataTable") %>%
-                     html_node("img") %>%
-                     html_attr("src") )
+  img_link <- try({
+    read_html(itemlist$link.item[n]) %>%
+      html_node("#DataTable img") %>%
+      html_attr("src")
+  })
   
   cat(" |", ifelse( class(img_link) == "try-error", "!img_link missing!" , "img_link present"))
   
@@ -1103,9 +1105,7 @@ ScrapeItemlist <- function(lnk,
     img_suffix <- gsub(img_prefix, "", img_link) %>%
       gsub("[a-zA-Z]*[0-9]+","",.)
     
-    itemlist %>% mutate(img_src = paste0(img_prefix, Item, img_suffix)) #%>%
-    # select(-Features)
-    
+    mutate(itemlist, img_src = paste0(img_prefix, Item, img_suffix))
   })
   
 }
@@ -1176,9 +1176,10 @@ GetNewItemsWrapper <- function(auctions_df, use.progress, progress_updater) {
   items_incr <- (1 - kAuctionsItemsBarSplit)/length(auctions_df$auction_id)
   
   items <- 1:nrow(auctions_df) %>%
-    lapply( function(i) {
+    lapply(function(i) {
       cat("\n", sprintf("%-4s", i) )
-      ScrapeItemlist(auctions_df$link.pageditems[i], items_incr, progress_updater)
+      ScrapeItemlist(auctions_df$link.pageditems[i], 
+                     items_incr, progress_updater)
     }) %>%
     setNames(auctions_df$auction_id)
   
