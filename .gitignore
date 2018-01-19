@@ -81,3 +81,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 .Rproj.user
+www/js/auth0-variables.js
