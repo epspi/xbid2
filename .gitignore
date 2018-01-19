@@ -2,6 +2,7 @@
 # Project Files
 # =========================
 *.csv
+www/js/auth0-variables.js
 
 # History files
 .Rhistory
