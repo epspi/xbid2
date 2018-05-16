@@ -23,89 +23,48 @@ library(digest)
 ## ///////////////////////////////////////////// ##
 
 # Local storage
-known_links_loc <- "data/current/known_links.csv"
-items_loc <- "data/current/items.csv"
-auctions_loc <- "data/current/auctions.csv"
-timestamp_loc <- "data/current/timestamp.csv"
+known_links_loc         <- "data/current/known_links.csv"
+items_loc               <- "data/current/items.csv"
+auctions_loc            <- "data/current/auctions.csv"
+timestamp_loc           <- "data/current/timestamp.csv"
 
-expired_auctions_loc <- "data/expired/expired_auctions.csv"
-expired_items_loc <- "data/expired/expired_items.csv"
+expired_auctions_loc    <- "data/expired/expired_auctions.csv"
+expired_items_loc       <- "data/expired/expired_items.csv"
 
-user_data_loc <- "data/user"
-user_db <- "data/xbid_dev.sqlite3"
-default_wishlist_loc <- "data/user/wishlist.csv"
+user_data_loc           <- "data/user"
+user_db                 <- "data/xbid_dev.sqlite3"
+default_wishlist_loc    <- "data/user/wishlist.csv"
 # default_favorites_loc <- "data/user/favorites.csv"
-searches_loc <- "data/log/searches.csv"
+searches_loc            <- "data/log/searches.csv"
 
 # Auctions will be considered expired after some delay
 kExpiredTimeOffset <- 1800
-kTimeFileFormat  <- "%Y-%m-%d %H:%M:%S"
-kTZ <- 'EST5EDT'
-auto_refresh_time <- 3600 * .5
-ending_soon_time <- 3600 * 2
+kTimeFileFormat    <- "%Y-%m-%d %H:%M:%S"
+kTZ                <- 'EST5EDT'
+auto_refresh_time  <- 3600 * .5
+ending_soon_time   <- 3600 * 2
 
 # UI Constants
-kMaxPins <- 150
+kMaxPins           <- 150
 
 # Scraping & Parsing constants
-kLocalLocations <- c("Cincinnati", "Sharonville", "West Chester",
-                     "Maineville", "Milford", "Fairfield", "Batavia", "Newport",
-                     "Dayton", "Covington")
+kLocalLocations       <- c("Cincinnati", "Sharonville", "West Chester", 
+                           "Maineville", "Milford", "Fairfield", 
+                           "Batavia", "Newport", "Dayton", "Covington")
+
 description_end_regex <- "((Item )?Location:|Front Page:|Contact:|Facebook:|Pinterest:|Twitter:).*"
-section_names <- "(Serial #|Lotted By|Load #|(Item )?Brand|(Item )?Desc(ription)?|MSRP|Model|Specifications|Width|Depth|Height|Weight|Item Link Calc|Additional Info(rmation)?) ?:"
-keepa_base <- "http://camelcamelcamel.com/search?sq="
-camel_base <- "http://camelcamelcamel.com/search?sq="
-amazon_base <- "http://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords="
-gcal_base <- "https://www.google.com/calendar/render?action=TEMPLATE&text=[description]&dates=[start]&details=[details]&location=[location]"
+section_names         <- "(Serial #|Lotted By|Load #|(Item )?Brand|(Item )?Desc(ription)?|MSRP|Model|Specifications|Width|Depth|Height|Weight|Item Link Calc|Additional Info(rmation)?) ?:"
 
-# Original css-only masonry style
-kPinsResHTML <-
-  '<div class="pin box box-info">
-        <div class="box-header with-border">
-            <h3 class="box-title">%s</h3></div>
-            <div class="box-body">
-            <a href="%s" target="_blank"><img src="%s"/></a>
-            <p>%s</p></div>
-            <div class="box-footer text-center no-padding">
-            <div class="box-tools">%s
-        </div></div>
-    </div>'
-
-
-# Alternative horizontal masonry style
-kPinsResHTML2 <-
-  '<div class="pod box box-info">
-        <div class="box-header with-border">
-            <h3 class="box-title">%s</h3>
-        </div>
-        <div class="box-body">
-            <a href="%s" target="_blank"><img src="%s"/></a>
-            <p>%s</p>
-        </div>
-        <div class="box-footer text-center no-padding">
-            <div class="box-tools">%s</div>
-        </div>
-    </div>'
-
-kTableResHTML <-
-  # '<div style="max-width: 500px;">
-  '<div style="width: 500px;">
-        <p style="word-wrap: break-word;">%s</p>%s
-    </div>'
-
-kTableImgHTML <-
-  '<a href="%s" target="_blank"><img src="%s" class="img-rounded" width="250"/></a>'
-
-kItemButtonsHTML <-
-  '<a href="%s" class="btn btn-box-tool" target="_blank"><i class="fa fa-ils"></i></a>
-        <a href="%s" class="btn btn-box-tool" target="_blank"><i class="fa fa-amazon"></i></a>
-        <a href="%s" class="btn btn-box-tool" target="_blank"><i class="fa fa-calendar-plus-o"></i></a>
-        <a class="btn btn-box-tool item" id="%s"><i class="fa fa-heart"%s></i></a>'
+keepa_base            <- "http://camelcamelcamel.com/search?sq="
+camel_base            <- "http://camelcamelcamel.com/search?sq="
+amazon_base           <- "http://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords="
+gcal_base             <- "https://www.google.com/calendar/render?action=TEMPLATE&text=[description]&dates=[start]&details=[details]&location=[location]"
 
 kAuctionsItemsBarSplit <- .5
 
-versionHist <- readLines("VERSION")
-version <- regmatches(versionHist[1], regexpr("\\d+[.]\\d+",versionHist[1]))
+versionHist            <- readLines("VERSION")
+version                <- regmatches(versionHist[1], 
+                                     regexpr("\\d+[.]\\d+", versionHist[1]))
 
 ## ///////////////////////////////////////////// ##
 ## MATH FUNCTIONS----------------------------------
