@@ -2,6 +2,7 @@
 # Project Files
 # =========================
 *.csv
+www/js/auth0-variables.js
 
 # History files
 .Rhistory
@@ -80,3 +81,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 .Rproj.user
+www/js/auth0-variables.js
