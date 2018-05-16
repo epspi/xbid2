@@ -87,20 +87,20 @@ server <- function(input, output, session) {
   # --User Profile--
   # observe(print(input$id_token))
   usr_profile <- eventReactive(input$id_token, {
-    
+
     if(input$id_token == "") {
       cat("No token!\n")
       return(NULL)
-      
+
     } else {
-      
+
       # User info using id_token JWT
       res <- POST(url = "https://epspi.auth0.com/tokeninfo",
                   body = list(id_token = input$id_token),
                   encode = "form")
-      
+
       if (res$status_code == 200) {
-        
+
         result <- content(res)
         session$sendCustomMessage("profile_handler", jsonlite::toJSON(result))
         cat("LOGGED IN PROFILE:\n")
@@ -108,12 +108,13 @@ server <- function(input, output, session) {
         print(jsonlite::toJSON(result, pretty = 4, auto_unbox = T))
         return(result)
       } else {
-        
+
         session$sendCustomMessage("expired_handler", "")
         return(NULL)
       }
     }
   })
+  
   
 
   #  ------->> Routing ---------

@@ -731,10 +731,18 @@ GenProductsGrid <- function(product_str, res) {
     %s
   </div>'
   
+  
+  if (nrow(res) == 0) return(NULL)
   res %>% 
-    mutate(Title = GenTitle(Brand, Model, Desc)) %>% 
-    with(sprintf(product_str, location, Condition, 
-                 link.item, img_src, link.item, Title, MSRP)) %>% 
+    mutate(
+      Title = GenTitle(Brand, Model, Desc),
+      GCal  = GenGcalUrl(url_encode(paste("Bid:", Title)), 
+                         date, link.item)
+    ) %>% 
+    with(., sprintf(product_str, location, Condition, 
+                    link.item, img_src, link.item, Title, MSRP,
+                    GCal)
+    ) %>% 
     paste0(collapse="") %>% 
     sprintf(layout_str, .) %>%
     HTML
