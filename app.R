@@ -10,7 +10,6 @@ source("global.R")
 # Server-side rendered content definitions
 uiSearchResults <- enclose(function() {
   grid_product <- read_file("www/_grid_product_sprintf.html")
-  grid_layout <- read_file("www/_grid_isotope.html")
   search_template2 <- read_file("www/_search_results2.html")
   range_slider_template <- read_file("www/_slider.html")
   
