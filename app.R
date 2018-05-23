@@ -15,22 +15,18 @@ uiSearchResults <- enclose(function() {
   
   function(search_res, query, opt, grid = T) {
     
-    page <- opt$page
-    page_size <- opt$page_size
-    
     htmlTemplate(
         text_ = search_template2, 
         search_term = query,
         n_items = nrow(search_res),
         products =  GenProductsGrid(grid_product, search_res), 
-        pagination = GenPagination(search_res, page, page_size),
         filters = GenFilters(range_slider_template, search_res),
         document_ = F)
   }
 })
 
 uiIndex <- tagList(
-  htmlTemplate("www/_main_slider.html"),
+  # htmlTemplate("www/_main_slider.html"),
   htmlTemplate("www/_promo.html"),
   htmlTemplate("www/_top_cats.html")
 )
@@ -144,7 +140,6 @@ server <- function(input, output, session) {
       
       # Update reactive values (bad style?)
       if ("term" %in% names(q)) last_query(q$term)
-      if ("page" %in% names(q)) search_options$page <- q$page
     }
     
     return(route)
@@ -173,8 +168,8 @@ server <- function(input, output, session) {
   last_query <- reactiveVal(NULL)
   grid_view <- reactiveVal(TRUE)
   search_options <- reactiveValues(
-    page = 1,
-    page_size = 12
+    # page = 1,
+    # page_size = 12
   )
   
   
