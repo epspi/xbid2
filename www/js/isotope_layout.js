@@ -1,23 +1,75 @@
 // Isotope Grid
 if ($(".isotope-grid").length) {
 
+  
+  // Get search results (not displayed)
+  var hidden_items = $("#search_results [class*=grid-item ]");
+  
+  
   // Generate grid
-  var $grid = $(".isotope-grid").imagesLoaded(function () {
-    $grid.isotope({
-      itemSelector: ".grid-item",
-      transitionDuration: "0.5s",
-      getSortData: {
-        time: ".product-title",
-        price: function (itemElem) { // function
-          return parsePrice($(itemElem).find('.product-price'));
-        }
-      },
-      masonry: {
-        columnWidth: ".grid-sizer",
-        gutter: ".gutter-sizer"
+  var $grid = $(".isotope-grid");
+  
+  $.fn.revealItems = function($items){
+		var iso = this.data('isotope');
+		var itemSelector = iso.options.itemSelector;
+		debugger;
+		$items.hide();
+		$(this).append($items);
+		$items.imagesLoaded().progress(function(imgLoad, image){
+			var $item = $(image.img).parents(itemSelector);
+			$item.show();
+			iso.appended($item);
+		});
+	
+		return this;
+	};
+  
+  $grid.isotope({
+    itemSelector: ".grid-item",
+    transitionDuration: "0.0s",
+    getSortData: {
+      time: ".product-title",
+      price: function (itemElem) { // function
+        return parsePrice($(itemElem).find('.product-price'));
       }
-    });
+    },
+    masonry: {
+      columnWidth: ".grid-sizer",
+      gutter: ".gutter-sizer"
+    }
   });
+  
+  $grid.imagesLoaded().progress(function(){
+		$grid.isotope();
+	});
+	
+	var revealed_count = 0;
+	function GenerateItems() {
+		var n = 15;
+		var items = hidden_items.slice(revealed_count, revealed_count + n);
+		items.find("img").attr( "src", function() {
+      return this.title;  
+    });
+    revealed_count += items.length;
+		return items;
+	}
+  
+  // SimpleInfiniteScroll
+	function Infinite(e){
+		if((e.type == 'scroll') || e.type == 'click'){
+			var doc = document.documentElement;
+			var top = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
+			var bottom = top + $(window).height();
+			var docBottom = $(document).height();
+			
+			if(bottom + 50 >= docBottom){
+				$grid.revealItems(GenerateItems());
+			}
+		}
+	}
+    
+	$grid.revealItems(GenerateItems());
+	$(window).scroll(Infinite);
 
   // Respond to sort dropdown
   var $sort_select = $("#sorting");

@@ -55,8 +55,6 @@ kLocalLocations       <- c("Cincinnati", "Sharonville", "West Chester",
 description_end_regex <- "((Item )?Location:|Front Page:|Contact:|Facebook:|Pinterest:|Twitter:).*"
 section_names         <- "(Serial #|Lotted By|Load #|(Item )?Brand|(Item )?Desc(ription)?|MSRP|Model|Specifications|Width|Depth|Height|Weight|Item Link Calc|Additional Info(rmation)?) ?:"
 
-keepa_base            <- "http://camelcamelcamel.com/search?sq="
-camel_base            <- "http://camelcamelcamel.com/search?sq="
 amazon_base           <- "http://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords="
 gcal_base             <- "https://www.google.com/calendar/render?action=TEMPLATE&text=[description]&dates=[start]&details=[details]&location=[location]"
 
@@ -687,8 +685,8 @@ GenProductsGrid <- function(product_str, res) {
   <div class="isotope-grid cols-3 mb-2">
     <div class="gutter-sizer"></div>
     <div class="grid-sizer"></div>
-    %s
-  </div>'
+  </div>
+  <div id="search_results" style="display: none;">%s</div>'
   
   
   if (nrow(res) == 0) return(NULL)
