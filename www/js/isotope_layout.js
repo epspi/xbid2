@@ -12,11 +12,11 @@ if ($(".isotope-grid").length) {
   $.fn.revealItems = function($items){
 		var iso = this.data('isotope');
 		var itemSelector = iso.options.itemSelector;
-		debugger;
 		$items.hide();
 		$(this).append($items);
 		$items.imagesLoaded().progress(function(imgLoad, image){
 			var $item = $(image.img).parents(itemSelector);
+		  filterIsotope();
 			$item.show();
 			iso.appended($item);
 		});
@@ -29,7 +29,7 @@ if ($(".isotope-grid").length) {
     transitionDuration: "0.0s",
     getSortData: {
       time: ".product-title",
-      price: function (itemElem) { // function
+      price: function (itemElem) { 
         return parsePrice($(itemElem).find('.product-price'));
       }
     },
@@ -45,7 +45,7 @@ if ($(".isotope-grid").length) {
 	
 	var revealed_count = 0;
 	function GenerateItems() {
-		var n = 15;
+		var n = 10;
 		var items = hidden_items.slice(revealed_count, revealed_count + n);
 		items.find("img").attr( "src", function() {
       return this.title;  
@@ -69,7 +69,6 @@ if ($(".isotope-grid").length) {
 	}
     
 	$grid.revealItems(GenerateItems());
-	$(window).scroll(Infinite);
 
   // Respond to sort dropdown
   var $sort_select = $("#sorting");
@@ -103,6 +102,8 @@ if ($(".isotope-grid").length) {
     msrp_range = values.map(parseFloat);
     filterIsotope();
   });
+  
+  $(window).scroll(Infinite);
 }
 function filterIsotope() {
   $grid.isotope({
@@ -142,6 +143,7 @@ function parsePrice(elem) {
 }
 function manageCheckbox($checkbox) {
   var checkbox = $checkbox[0];
+  debugger;
 
   var group = $checkbox.parents('.option-set').attr('data-group');
   // create array for filter group, if not there yet
