@@ -23,16 +23,14 @@ if ($(".isotope-grid").length) {
 	
 		return this;
 	};
+	
+	$.fn.resortItems = function() {
+	  this.isotope('remove', this.isotope('getItemElements'));
+	};
   
   $grid.isotope({
     itemSelector: ".grid-item",
     transitionDuration: "0.0s",
-    getSortData: {
-      time: ".product-title",
-      price: function (itemElem) { 
-        return parsePrice($(itemElem).find('.product-price'));
-      }
-    },
     masonry: {
       columnWidth: ".grid-sizer",
       gutter: ".gutter-sizer"
@@ -73,19 +71,24 @@ if ($(".isotope-grid").length) {
   // Respond to sort dropdown
   var $sort_select = $("#sorting");
   $sort_select.change(function () {
-    var asc = true;
     var sort_value = $(this).find(":selected").attr("data-sort-value");
+    $grid.isotope('remove', $grid.isotope('getItemElements'));
+    revealed_count = 0;
     if (sort_value == "price_low_high") {
-      sort_value = "price";
+        hidden_items.sort(function (a, b) {
+        ap = parsePrice($(a).find('.product-price'));
+        bp = parsePrice($(b).find('.product-price'));
+        return ap - bp;
+      });
     } else if (sort_value == "price_high_low") {
-      sort_value = "price";
-      asc = false;
+      hidden_items.sort(function (a, b) {
+        ap = parsePrice($(a).find('.product-price'));
+        bp = parsePrice($(b).find('.product-price'));
+        return bp - ap;
+      });
     }
+    $grid.revealItems(GenerateItems());
 
-    $grid.isotope({
-      sortBy: sort_value,
-      sortAscending: asc
-    });
   });
 
   // Respond to filter checkboxes
