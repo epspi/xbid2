@@ -3,7 +3,6 @@ require(dplyr)
 require(shiny)
 require(shinyjs)
 require(httr)
-source("router.R")
 source("global.R")
 
 
