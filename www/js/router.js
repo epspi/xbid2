@@ -5,7 +5,7 @@ $('document').ready(function() {
   searchText.keypress(function (e) {
     if (e.which == 13) {
       window.location.href = '#/search?term=' +
-        searchText.val();
+         encodeURIComponent(searchText.val());
       $('.close-search, .clear-search').click();
     }
   });
