@@ -3,35 +3,29 @@ require(dplyr)
 require(shiny)
 require(shinyjs)
 require(httr)
-source("router.R")
 source("global.R")
 
 
 # Server-side rendered content definitions
 uiSearchResults <- enclose(function() {
   grid_product <- read_file("www/_grid_product_sprintf.html")
-  grid_layout <- read_file("www/_grid_isotope.html")
   search_template2 <- read_file("www/_search_results2.html")
   range_slider_template <- read_file("www/_slider.html")
   
   function(search_res, query, opt, grid = T) {
-    
-    page <- opt$page
-    page_size <- opt$page_size
     
     htmlTemplate(
         text_ = search_template2, 
         search_term = query,
         n_items = nrow(search_res),
         products =  GenProductsGrid(grid_product, search_res), 
-        pagination = GenPagination(search_res, page, page_size),
         filters = GenFilters(range_slider_template, search_res),
         document_ = F)
   }
 })
 
 uiIndex <- tagList(
-  htmlTemplate("www/_main_slider.html"),
+  # htmlTemplate("www/_main_slider.html"),
   htmlTemplate("www/_promo.html"),
   htmlTemplate("www/_top_cats.html")
 )
@@ -87,20 +81,20 @@ server <- function(input, output, session) {
   # --User Profile--
   # observe(print(input$id_token))
   usr_profile <- eventReactive(input$id_token, {
-    
+
     if(input$id_token == "") {
       cat("No token!\n")
       return(NULL)
-      
+
     } else {
-      
+
       # User info using id_token JWT
       res <- POST(url = "https://epspi.auth0.com/tokeninfo",
                   body = list(id_token = input$id_token),
                   encode = "form")
-      
+
       if (res$status_code == 200) {
-        
+
         result <- content(res)
         session$sendCustomMessage("profile_handler", jsonlite::toJSON(result))
         cat("LOGGED IN PROFILE:\n")
@@ -108,12 +102,13 @@ server <- function(input, output, session) {
         print(jsonlite::toJSON(result, pretty = 4, auto_unbox = T))
         return(result)
       } else {
-        
+
         session$sendCustomMessage("expired_handler", "")
         return(NULL)
       }
     }
   })
+  
   
 
   #  ------->> Routing ---------
@@ -144,7 +139,6 @@ server <- function(input, output, session) {
       
       # Update reactive values (bad style?)
       if ("term" %in% names(q)) last_query(q$term)
-      if ("page" %in% names(q)) search_options$page <- q$page
     }
     
     return(route)
@@ -173,8 +167,8 @@ server <- function(input, output, session) {
   last_query <- reactiveVal(NULL)
   grid_view <- reactiveVal(TRUE)
   search_options <- reactiveValues(
-    page = 1,
-    page_size = 12
+    # page = 1,
+    # page_size = 12
   )
   
   
@@ -187,15 +181,17 @@ server <- function(input, output, session) {
                               search_df = items_df,
                               join_df = auctions_df,
                               # favs_df = favorites$data,
-                              favs_df = NULL) %>% 
-          mutate(Condition = MutateConditions(Condition))
+                              favs_df = NULL)
       
-      # View(result)
-      return(result)
+      if (nrow(result) > 0) mutate(result, Condition = MutateConditions(Condition))
+      else result
     })
   })
   
-  paginated_res <- reactive({search_res()})
+  paginated_res <- reactive({
+    validate(need(search_res(), "No items found"))
+    search_res()
+  })
 }
 
 

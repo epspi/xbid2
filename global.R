@@ -23,89 +23,52 @@ library(digest)
 ## ///////////////////////////////////////////// ##
 
 # Local storage
-known_links_loc <- "data/current/known_links.csv"
-items_loc <- "data/current/items.csv"
-auctions_loc <- "data/current/auctions.csv"
-timestamp_loc <- "data/current/timestamp.csv"
+known_links_loc         <- "data/current/known_links.csv"
+items_loc               <- "data/current/items.csv"
+auctions_loc            <- "data/current/auctions.csv"
+timestamp_loc           <- "data/current/timestamp.csv"
 
-expired_auctions_loc <- "data/expired/expired_auctions.csv"
-expired_items_loc <- "data/expired/expired_items.csv"
+expired_auctions_loc    <- "data/expired/expired_auctions.csv"
+expired_items_loc       <- "data/expired/expired_items.csv"
 
-user_data_loc <- "data/user"
-user_db <- "data/xbid_dev.sqlite3"
-default_wishlist_loc <- "data/user/wishlist.csv"
+user_data_loc           <- "data/user"
+user_db                 <- "data/xbid_dev.sqlite3"
+default_wishlist_loc    <- "data/user/wishlist.csv"
 # default_favorites_loc <- "data/user/favorites.csv"
-searches_loc <- "data/log/searches.csv"
+searches_loc            <- "data/log/searches.csv"
 
 # Auctions will be considered expired after some delay
 kExpiredTimeOffset <- 1800
-kTimeFileFormat  <- "%Y-%m-%d %H:%M:%S"
-kTZ <- 'EST5EDT'
-auto_refresh_time <- 3600 * .5
-ending_soon_time <- 3600 * 2
+kTimeFileFormat    <- "%Y-%m-%d %H:%M:%S"
+kTZ                <- 'EST5EDT'
+auto_refresh_time  <- 3600 * .5
+ending_soon_time   <- 3600 * 2
 
 # UI Constants
-kMaxPins <- 150
+kMaxPins           <- 150
 
 # Scraping & Parsing constants
-kLocalLocations <- c("Cincinnati", "Sharonville", "West Chester",
-                     "Maineville", "Milford", "Fairfield", "Batavia", "Newport",
-                     "Dayton", "Covington")
+kLocalLocations       <- c("Cincinnati", "Sharonville", "West Chester", 
+                           "Maineville", "Milford", "Fairfield", 
+                           "Batavia", "Newport", "Dayton", "Covington")
+
 description_end_regex <- "((Item )?Location:|Front Page:|Contact:|Facebook:|Pinterest:|Twitter:).*"
-section_names <- "(Serial #|Lotted By|Load #|(Item )?Brand|(Item )?Desc(ription)?|MSRP|Model|Specifications|Width|Depth|Height|Weight|Item Link Calc|Additional Info(rmation)?) ?:"
-keepa_base <- "http://camelcamelcamel.com/search?sq="
-camel_base <- "http://camelcamelcamel.com/search?sq="
-amazon_base <- "http://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords="
-gcal_base <- "https://www.google.com/calendar/render?action=TEMPLATE&text=[description]&dates=[start]&details=[details]&location=[location]"
+section_names         <- "(Serial #|Lotted By|Load #|(Item )?Brand|(Item )?Desc(ription)?|MSRP|Model|Specifications|Width|Depth|Height|Weight|Item Link Calc|Additional Info(rmation)?) ?:"
 
-# Original css-only masonry style
-kPinsResHTML <-
-  '<div class="pin box box-info">
-        <div class="box-header with-border">
-            <h3 class="box-title">%s</h3></div>
-            <div class="box-body">
-            <a href="%s" target="_blank"><img src="%s"/></a>
-            <p>%s</p></div>
-            <div class="box-footer text-center no-padding">
-            <div class="box-tools">%s
-        </div></div>
-    </div>'
-
-
-# Alternative horizontal masonry style
-kPinsResHTML2 <-
-  '<div class="pod box box-info">
-        <div class="box-header with-border">
-            <h3 class="box-title">%s</h3>
-        </div>
-        <div class="box-body">
-            <a href="%s" target="_blank"><img src="%s"/></a>
-            <p>%s</p>
-        </div>
-        <div class="box-footer text-center no-padding">
-            <div class="box-tools">%s</div>
-        </div>
-    </div>'
-
-kTableResHTML <-
-  # '<div style="max-width: 500px;">
-  '<div style="width: 500px;">
-        <p style="word-wrap: break-word;">%s</p>%s
-    </div>'
-
-kTableImgHTML <-
-  '<a href="%s" target="_blank"><img src="%s" class="img-rounded" width="250"/></a>'
-
-kItemButtonsHTML <-
-  '<a href="%s" class="btn btn-box-tool" target="_blank"><i class="fa fa-ils"></i></a>
-        <a href="%s" class="btn btn-box-tool" target="_blank"><i class="fa fa-amazon"></i></a>
-        <a href="%s" class="btn btn-box-tool" target="_blank"><i class="fa fa-calendar-plus-o"></i></a>
-        <a class="btn btn-box-tool item" id="%s"><i class="fa fa-heart"%s></i></a>'
+amazon_base           <- "http://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords="
+gcal_base             <- "https://www.google.com/calendar/render?action=TEMPLATE&text=[description]&dates=[start]&details=[details]&location=[location]"
 
 kAuctionsItemsBarSplit <- .5
 
-versionHist <- readLines("VERSION")
-version <- regmatches(versionHist[1], regexpr("\\d+[.]\\d+",versionHist[1]))
+versionHist            <- readLines("VERSION")
+version                <- regmatches(versionHist[1], 
+                                     regexpr("\\d+[.]\\d+", versionHist[1]))
+
+## ///////////////////////////////////////////// ##
+## MATH FUNCTIONS----------------------------------
+## ///////////////////////////////////////////// ##
+NAto0 <- function(x) x[is.na(x)] <- 0
+INFto0 <- function(x) x[!is.finite(x)] <- 0
 
 ## ///////////////////////////////////////////// ##
 ## IO FUNCTIONS------------------------------------
@@ -323,7 +286,7 @@ ParseDescription <- function(description) {
   description %>%
     iconv(to = 'latin1', sub = ' ') %>%
     # enc2utf8 %>% 
-    gsub(description_end_regex, "", .) %>%
+    # gsub(description_end_regex, "", .) %>%
     gsub(section_names, "<<\\1:>>", .) %>%
     CleanStr
 }
@@ -455,18 +418,17 @@ ExtractSection <- function(description,
 GenTitle <- function(brand,
                      model,
                      description,
-                     max_words=6) {
+                     max_words=7) {
   Map(function(b, m, d) {
-    res <- strsplit(d, " ") %>%
-      sapply(function(x) {
-        paste0(x[1:min(length(x), max_words)], collapse = " ")
-      })
     
-    clean_b <- ifelse(is.na(b), "", b)
-    clean_m <- ifelse(is.na(m), "", m)
+    max_words <- max_words - is.na(m) - is.na(b)
+    res <- strsplit(d, "[ ,]")[[1]] %>% 
+      .[1:min(length(.), max_words)] %>% 
+      paste0(collapse = " ")
+    
     if(!is.na(m)) {
       res <- res %>% 
-        # gsub(m, "", .) %>% 
+        gsub(m, "", .) %>%
         paste(m, .)
     }
     if(!is.na(b)) {
@@ -474,6 +436,7 @@ GenTitle <- function(brand,
         gsub(b, "", .) %>%
         paste(b, .)
     }
+    res
     
   }, brand, model, description) %>%
     as.character %>% 
@@ -722,11 +685,21 @@ GenProductsGrid <- function(product_str, res) {
   <div class="isotope-grid cols-3 mb-2">
     <div class="gutter-sizer"></div>
     <div class="grid-sizer"></div>
-    %s
-  </div>'
+  </div>
+  <div id="search_results" style="display: none;">%s</div>'
   
-  with(res, sprintf(product_str, location, Condition, 
-                    link.item, img_src, link.item, Item, MSRP)) %>% 
+  
+  if (nrow(res) == 0) return(NULL)
+  res %>% 
+    mutate(
+      Title = GenTitle(Brand, Model, Desc),
+      GCal  = GenGcalUrl(url_encode(paste("Bid:", Title)), 
+                         date, link.item)
+    ) %>% 
+    with(., sprintf(product_str, location, Condition, 
+                    link.item, img_src, link.item, Title, MSRP,
+                    GCal)
+    ) %>% 
     paste0(collapse="") %>% 
     sprintf(layout_str, .) %>%
     HTML
@@ -744,7 +717,7 @@ GenProductsList <- function(template_str, res) {
 }
 GenPagination <- function(sorted_res, page, page_size = 12) {
   page <- as.integer(page)
-  pages <- 1:ceiling(nrow(sorted_res) / page_size)
+  pages <- 1:max(1, ceiling(nrow(sorted_res) / page_size))
   classes <- character(length(pages))
   classes[page] <- ' class = "active"'
   sprintf('<li%s><a href="#">%s</a></li>', classes, pages) %>% 
@@ -752,7 +725,7 @@ GenPagination <- function(sorted_res, page, page_size = 12) {
     HTML
 }
 GenRangeSlider <- function(template_str, res) {
-  price_max <- ceiling(max(res$MSRP, na.rm = T))
+  price_max <- ceiling(max(res$MSRP, 1, na.rm = T))
   HTML(sprintf(template_str, 0, price_max, 0, price_max))
 }
 GenCheckbox <- function(id, label, value, val_label, val_parens) {
@@ -1053,20 +1026,21 @@ ScrapeItemlist <- function(lnk,
   itemlist <- root_link %>%
     gsub("mnlist", "mnprint", .) %>%
     read_html(encoding = "ISO-8859-1") %>%
-    html_node("#DataTable") %>%
-    html_table(header = T, fill = T) %>%
+    html_node("#DataTable")
+  
+  emb_tables <- html_nodes(itemlist, "table")
+  if (length(emb_tables) > 0) return(NULL)
+  itemlist <- html_table(itemlist, header = T, fill = T) %>%
     mutate(Item = gsub("[.]","", Item),
-           Description = ParseDescription(Description),
+           Description2 = ParseDescription(Description),
+           Description = gsub(description_end_regex, "", Description2),
            link.item = paste0(root_link, Item),
-           Features = GrokFeatures(Description)
-    ) %>%
-    # Extract specific features from grokked Features
-    mutate(
-      Brand = GetFeature(Features, "Brand"),
-      Model = GetFeature(Features, "Model"),
-      MSRP = GetMSRP(Features),
-      Condition = GetFeature(Features, "Additional Info|Condition"),
-      Desc = GetFeature(Features, "Desc")
+           Features = GrokFeatures(Description),
+           Brand = GetFeature(Features, "Brand"),
+           Model = GetFeature(Features, "Model"),
+           MSRP = GetMSRP(Features),
+           Condition = GetFeature(Features, "Additional Info|Condition"),
+           Desc = GetFeature(Features, "Desc")
     )
   
   ####
@@ -1074,16 +1048,15 @@ ScrapeItemlist <- function(lnk,
   itemlist$Features <- FlattenFeatures(itemlist$Features)
   ####
   
-  
   cat(" |","itemlist ok")
   #itemlist %>%  print
   
   n <- nrow(itemlist)
-  img_link <- try( itemlist$link.item %>% .[n] %>%
-                     read_html %>%
-                     html_node("#DataTable") %>%
-                     html_node("img") %>%
-                     html_attr("src") )
+  img_link <- try({
+    read_html(itemlist$link.item[n]) %>%
+      html_node("#DataTable img") %>%
+      html_attr("src")
+  })
   
   cat(" |", ifelse( class(img_link) == "try-error", "!img_link missing!" , "img_link present"))
   
@@ -1097,9 +1070,7 @@ ScrapeItemlist <- function(lnk,
     img_suffix <- gsub(img_prefix, "", img_link) %>%
       gsub("[a-zA-Z]*[0-9]+","",.)
     
-    itemlist %>% mutate(img_src = paste0(img_prefix, Item, img_suffix)) #%>%
-    # select(-Features)
-    
+    mutate(itemlist, img_src = paste0(img_prefix, Item, img_suffix))
   })
   
 }
@@ -1170,9 +1141,10 @@ GetNewItemsWrapper <- function(auctions_df, use.progress, progress_updater) {
   items_incr <- (1 - kAuctionsItemsBarSplit)/length(auctions_df$auction_id)
   
   items <- 1:nrow(auctions_df) %>%
-    lapply( function(i) {
+    lapply(function(i) {
       cat("\n", sprintf("%-4s", i) )
-      ScrapeItemlist(auctions_df$link.pageditems[i], items_incr, progress_updater)
+      ScrapeItemlist(auctions_df$link.pageditems[i], 
+                     items_incr, progress_updater)
     }) %>%
     setNames(auctions_df$auction_id)
   

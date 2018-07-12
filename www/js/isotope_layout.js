@@ -1,40 +1,94 @@
 // Isotope Grid
 if ($(".isotope-grid").length) {
 
+  
+  // Get search results (not displayed)
+  var hidden_items = $("#search_results [class*=grid-item ]");
+  
+  
   // Generate grid
-  var $grid = $(".isotope-grid").imagesLoaded(function () {
-    $grid.isotope({
-      itemSelector: ".grid-item",
-      transitionDuration: "0.5s",
-      getSortData: {
-        time: ".product-title",
-        price: function (itemElem) { // function
-          return parsePrice($(itemElem).find('.product-price'));
-        }
-      },
-      masonry: {
-        columnWidth: ".grid-sizer",
-        gutter: ".gutter-sizer"
-      }
-    });
+  var $grid = $(".isotope-grid");
+  
+  $.fn.revealItems = function($items){
+		var iso = this.data('isotope');
+		var itemSelector = iso.options.itemSelector;
+		$items.hide();
+		$(this).append($items);
+		$items.imagesLoaded().progress(function(imgLoad, image){
+			var $item = $(image.img).parents(itemSelector);
+		  filterIsotope();
+			$item.show();
+			iso.appended($item);
+		});
+	
+		return this;
+	};
+	
+	$.fn.resortItems = function() {
+	  this.isotope('remove', this.isotope('getItemElements'));
+	};
+  
+  $grid.isotope({
+    itemSelector: ".grid-item",
+    transitionDuration: "0.0s",
+    masonry: {
+      columnWidth: ".grid-sizer",
+      gutter: ".gutter-sizer"
+    }
   });
+  
+  $grid.imagesLoaded().progress(function(){
+		$grid.isotope();
+	});
+	
+	var revealed_count = 0;
+	function GenerateItems() {
+		var n = 10;
+		var items = hidden_items.slice(revealed_count, revealed_count + n);
+		items.find("img").attr( "src", function() {
+      return this.title;  
+    });
+    revealed_count += items.length;
+		return items;
+	}
+  
+  // SimpleInfiniteScroll
+	function Infinite(e){
+		if((e.type == 'scroll') || e.type == 'click'){
+			var doc = document.documentElement;
+			var top = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
+			var bottom = top + $(window).height();
+			var docBottom = $(document).height();
+			
+			if(bottom + 50 >= docBottom){
+				$grid.revealItems(GenerateItems());
+			}
+		}
+	}
+    
+	$grid.revealItems(GenerateItems());
 
   // Respond to sort dropdown
   var $sort_select = $("#sorting");
   $sort_select.change(function () {
-    var asc = true;
     var sort_value = $(this).find(":selected").attr("data-sort-value");
+    $grid.isotope('remove', $grid.isotope('getItemElements'));
+    revealed_count = 0;
     if (sort_value == "price_low_high") {
-      sort_value = "price";
+        hidden_items.sort(function (a, b) {
+        ap = parsePrice($(a).find('.product-price'));
+        bp = parsePrice($(b).find('.product-price'));
+        return ap - bp;
+      });
     } else if (sort_value == "price_high_low") {
-      sort_value = "price";
-      asc = false;
+      hidden_items.sort(function (a, b) {
+        ap = parsePrice($(a).find('.product-price'));
+        bp = parsePrice($(b).find('.product-price'));
+        return bp - ap;
+      });
     }
+    $grid.revealItems(GenerateItems());
 
-    $grid.isotope({
-      sortBy: sort_value,
-      sortAscending: asc
-    });
   });
 
   // Respond to filter checkboxes
@@ -51,6 +105,8 @@ if ($(".isotope-grid").length) {
     msrp_range = values.map(parseFloat);
     filterIsotope();
   });
+  
+  $(window).scroll(Infinite);
 }
 function filterIsotope() {
   $grid.isotope({
@@ -90,6 +146,7 @@ function parsePrice(elem) {
 }
 function manageCheckbox($checkbox) {
   var checkbox = $checkbox[0];
+  debugger;
 
   var group = $checkbox.parents('.option-set').attr('data-group');
   // create array for filter group, if not there yet

@@ -28,49 +28,20 @@
             <label for="sorting">Sort by:</label>
             <select class="form-control" id="sorting">
               <option data-sort-value="time">Ending Time</option>
-              <option data-sort-value="price_low_high">Price: Low - High</option>
               <option data-sort-value="price_high_low">Price: High - Low</option>
+              <option data-sort-value="price_low_high">Price: Low - High</option>
             </select>
             <span class="text-muted">Showing:&nbsp;</span>
-            <span>1 - {{n_items}} items</span>
-            <!--<label for="sorting">Items:</label>
-            <select class="form-control" id="page_size">
-              <option>12</option>
-              <option>25</option>
-              <option>50</option>
-            </select> -->
+            <span>{{n_items}} items</span>
           </div>
         </div>
         <div class="column">
           <div class="shop-view">
-            <a class="grid-view active" href="#">
-              <span></span>
-              <span></span>
-              <span></span>
-            </a>
-            <a class="list-view" href="#">
-              <span></span>
-              <span></span>
-              <span></span>
-            </a>
           </div>
         </div>
       </div>
       <!-- Products -->
       {{products}}
-      <!-- Pagination -->
-      <nav class="pagination">
-        <div class="column">
-          <ul class="pages">
-            {{pagination}}
-          </ul>
-        </div>
-        <div class="column text-right hidden-xs-down">
-          <a class="btn btn-outline-secondary btn-sm" href="#">Next&nbsp;
-            <i class="icon-arrow-right"></i>
-          </a>
-        </div>
-      </nav>
     </div>
     <!-- Sidebar -->
     <div class="col-xl-3 col-lg-4 order-lg-1">
