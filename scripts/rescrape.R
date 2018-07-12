@@ -1,3 +1,3 @@
-setwd("/srv/shiny-server/xbid2/")
+setwd("/home/ubuntu/repos/xbid2/")
 source('global.R')
 Rescrape(F)
