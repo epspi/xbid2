@@ -3,6 +3,7 @@
 # =========================
 *.csv
 www/js/auth0-variables.js
+*.log
 
 # History files
 .Rhistory
