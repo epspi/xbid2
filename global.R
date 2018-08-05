@@ -17,6 +17,7 @@ library(httr)
 library(shiny)
 library(shinydashboard)
 library(digest)
+library(purrr)
 
 ## ///////////////////////////////////////////// ##
 ## CONSTANTS---------------------------------------
@@ -939,33 +940,34 @@ ScrapeCurrentLinks <- function() {
 }
 ScrapeCurrentLinks2 <- function() {
   
-  lnk <- "http://bidfta.bidqt.com/BidFTA/services/invoices/WlAuctions/filter?size=500&sort=endDateTime%20asc"
+  lnk   <- "http://bidfta.bidqt.com/BidFTA/services/invoices/WlAuctions/filter"
+  ua    <- "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36"
+  body  <- list(q = "showTimeRemaining=0")
+  query <- list(sort = 'endDateTime asc', size = 250, page = 1)
   
-  result <- list()
-  page <- 1
-  last <- FALSE
+  result <- tibble()
+  last   <- FALSE
   while (!last) {
-    a <- POST(lnk, content_type("application/x-www-form-urlencoded"), 
-              query = list(page = page))
+    POST(url = lnk, query = query, body = body, encode = "form",
+         user_agent(ua),
+         content_type("application/x-www-form-urlencoded")) -> a
     
     # Status code checking
-    if (a$status_code != 200) {
-      stop("Status code not 200!")
-    }
+    if (a$status_code != 200) stop("Status code not 200!")
     
     # Store results
-    res <- content(a)
-    result <- c(result, res$content)
+    res    <- jsonlite::fromJSON(content(a, as = "text", flatten = TRUE))
+    result <- bind_rows(result, res$content)
     
     # Increment
     last <- res$last
-    page <- page + 1
+    query$page <- query$page + 1
   }
   
-  # result
-  sapply(result, function(x) paste0(x$auctionUrl, x$auctionNumber)) %>% 
+  with(result, paste0(auctionUrl, auctionNumber)) %>% 
     gsub("mnlist", "mndetails", .)
 }
+
 ScrapeAuctionDetails <- function(new_links,
                                  incr,
                                  progress_updater = NULL) {
