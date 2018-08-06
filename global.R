@@ -420,7 +420,7 @@ GenTitle <- function(brand,
                      model,
                      description,
                      max_words=7) {
-  Map(function(b, m, d) {
+  Map(f = function(b, m, d) {
     
     max_words <- max_words - is.na(m) - is.na(b)
     res <- strsplit(d, "[ ,]")[[1]] %>% 
@@ -429,12 +429,12 @@ GenTitle <- function(brand,
     
     if(!is.na(m)) {
       res <- res %>% 
-        gsub(m, "", .) %>%
+        gsub(m, "", ., fixed = T) %>%
         paste(m, .)
     }
     if(!is.na(b)) {
       res <- res %>% 
-        gsub(b, "", .) %>%
+        gsub(b, "", ., fixed = T) %>%
         paste(b, .)
     }
     res
