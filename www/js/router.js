@@ -6,7 +6,7 @@ $('document').ready(function() {
     if (e.which == 13) {
       window.location.href = '#/search?term=' +
          encodeURIComponent(searchText.val());
-      $('.close-search, .clear-search').click();
+      $('.close-search').click();
     }
   });
 });
