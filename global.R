@@ -817,7 +817,12 @@ Rescrape <- function(use.progress = T) {
   ### GET NEW LINKS
   # Reading in old auction links and comparing with currently-available links.
   # We only scrape links not previously known!
-  current_links  <- ScrapeCurrentLinks2() %>% unique
+  
+  current_links <- ScrapeCurrentLinks2(
+    filter_fun = partial(grep, pattern = "bid.bidfta.com", value = T)
+  )
+    
+  
   new_links <- if (file.exists(known_links_loc)) {
     read.csv(known_links_loc, header = F, stringsAsFactors = F)[,1] %>%
       setdiff(current_links, .)
@@ -938,7 +943,7 @@ ScrapeCurrentLinks <- function() {
     html_nodes(".auction a[target=_blank]")  %>%
     html_attr("href")
 }
-ScrapeCurrentLinks2 <- function() {
+ScrapeCurrentLinks2 <- function(filter_fun = NULL) {
   
   lnk   <- "http://bidfta.bidqt.com/BidFTA/services/invoices/WlAuctions/filter"
   ua    <- "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36"
@@ -965,7 +970,9 @@ ScrapeCurrentLinks2 <- function() {
   }
   
   with(result, paste0(auctionUrl, auctionNumber)) %>% 
-    gsub("mnlist", "mndetails", .)
+    gsub("mnlist", "mndetails", .) %>% 
+    unique() %>% 
+    `if`(is.null(filter_fun), ., filter_fun(.))
 }
 
 ScrapeAuctionDetails <- function(new_links,
